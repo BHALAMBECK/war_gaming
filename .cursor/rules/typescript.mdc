@@ -1,0 +1,37 @@
+# TypeScript Style Guide
+
+## Strict Mode
+- Always use `strict: true` in tsconfig.json.
+- No `any` types. Use `unknown` and type guards if needed.
+- Enable `noUncheckedIndexedAccess` for safer array/object access.
+
+## Type Definitions
+- Explicit types at module boundaries (function parameters, return types, exports).
+- Prefer interfaces for object shapes, types for unions/intersections.
+- Use branded types for unit safety (e.g., `type Meters = number & { __brand: 'meters' }`).
+
+## Vector Math
+- Use typed vector helpers (e.g., `Vec3`, `Quaternion`) with explicit units.
+- Prefer Three.js `Vector3` for 3D math, but wrap with unit-aware helpers if needed.
+- Document coordinate system assumptions (ECI, ECEF, local frame).
+
+## Module Organization
+- No hidden globals. All state via Zustand stores or React context.
+- Use path aliases (`@/`) for imports from src.
+- Group related types in `types.ts` files within modules.
+
+## Examples
+```typescript
+// Good: explicit types, no any
+export function propagateOrbit(
+  state: OrbitalState,
+  dt: Seconds
+): OrbitalState {
+  // ...
+}
+
+// Bad: any, implicit types
+export function propagateOrbit(state: any, dt: any) {
+  // ...
+}
+```

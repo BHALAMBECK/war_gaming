@@ -1,0 +1,866 @@
+{
+  "name": "Simple Ring Formation",
+  "description": "50 agents in circular Low Earth Orbit with ring formation behavior enabled",
+  "version": "1.0.0",
+  "earth": {
+    "radius": 6371000,
+    "mu": 3.986004418e14
+  },
+  "agents": [
+    {
+      "id": "agent-0",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-1",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.12566370614359174
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-2",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.25132741228718347
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-3",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.3769911184307752
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-4",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.5026548245743669
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-5",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.6283185307179586
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-6",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.7539822368615504
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-7",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.8796459430051422
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-8",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.0053096491487338
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-9",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.1309733552923255
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-10",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.2566370614359172
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-11",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.382300767579509
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-12",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.5079644737231008
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-13",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.6336281798666925
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-14",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.7592918860102844
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-15",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.884955592153876
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-16",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.0106192982974676
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-17",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.1362830044410593
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-18",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.261946710584651
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-19",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.3876104167282427
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-20",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.5132741228718344
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-21",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.638937829015426
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-22",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.764601535159018
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-23",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.8902652413026097
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-24",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.0159289474462014
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-25",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.141592653589793
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-26",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.2672563597333847
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-27",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.3929200658769764
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-28",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.518583772020568
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-29",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.64424747816416
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-30",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.7699111843077517
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-31",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.8955748904513434
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-32",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.016238594594935
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-33",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.141902300738527
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-34",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.267566006882119
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-35",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.39322971302571
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-36",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.518893419169302
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-37",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.644557125312894
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-38",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.770220831456486
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-39",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.895884537600077
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-40",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.021548243743669
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-41",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.147211949887261
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-42",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.272875656030853
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-43",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.398539362174444
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-44",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.524203068318036
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-45",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.649866774461628
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-46",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.77553048060522
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-47",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.901194186748811
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-48",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 6.157857892892403
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-49",
+      "orbit": {
+        "a": 6771000,
+        "e": 0,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 6.283185307179586
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    }
+  ],
+  "sim": {
+    "timeStep": 1.0,
+    "initialTime": 0
+  },
+  "seed": "simple-ring-formation"
+}

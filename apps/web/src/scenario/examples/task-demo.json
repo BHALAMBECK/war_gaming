@@ -1,0 +1,140 @@
+{
+  "name": "Task Allocation Demo",
+  "description": "Demo scenario with task allocation objectives - inspect points, relay nodes, and formation zones",
+  "version": "1.0.0",
+  "earth": {
+    "radius": 6371000,
+    "mu": 3.986004418e14
+  },
+  "agents": [
+    {
+      "id": "agent-0",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.05,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0
+      },
+      "behaviors": {
+        "cohesion": false,
+        "separation": true,
+        "alignment": false,
+        "formation": "none"
+      }
+    },
+    {
+      "id": "agent-1",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.05,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.2566370614359172
+      },
+      "behaviors": {
+        "cohesion": false,
+        "separation": true,
+        "alignment": false,
+        "formation": "none"
+      }
+    },
+    {
+      "id": "agent-2",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.05,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.5132741228718344
+      },
+      "behaviors": {
+        "cohesion": false,
+        "separation": true,
+        "alignment": false,
+        "formation": "none"
+      }
+    },
+    {
+      "id": "agent-3",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.05,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.7699111843077517
+      },
+      "behaviors": {
+        "cohesion": false,
+        "separation": true,
+        "alignment": false,
+        "formation": "none"
+      }
+    },
+    {
+      "id": "agent-4",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.05,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.026548245743669
+      },
+      "behaviors": {
+        "cohesion": false,
+        "separation": true,
+        "alignment": false,
+        "formation": "none"
+      }
+    }
+  ],
+  "sim": {
+    "timeStep": 1.0,
+    "initialTime": 0
+  },
+  "seed": "task-demo-scenario",
+  "objectives": [
+    {
+      "id": "inspect-1",
+      "type": "inspect_point",
+      "position": [7000000, 0, 0],
+      "points": 10,
+      "completed": false,
+      "threshold": 50000
+    },
+    {
+      "id": "inspect-2",
+      "type": "inspect_point",
+      "position": [0, 7000000, 0],
+      "points": 10,
+      "completed": false,
+      "threshold": 50000
+    },
+    {
+      "id": "relay-1",
+      "type": "relay_node",
+      "position": [0, 0, 7000000],
+      "points": 25,
+      "completed": false,
+      "holdDuration": 30,
+      "threshold": 100000,
+      "assignedAgentId": null,
+      "startTime": null
+    },
+    {
+      "id": "zone-1",
+      "type": "hold_formation_zone",
+      "position": [4950000, 4950000, 0],
+      "points": 50,
+      "completed": false,
+      "radius": 200000,
+      "requiredAgents": 2,
+      "assignedAgentIds": []
+    }
+  ]
+}

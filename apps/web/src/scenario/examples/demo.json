@@ -1,0 +1,187 @@
+{
+  "name": "Demo Scenario",
+  "description": "Pre-configured for 30-60 second demo with optimized visuals",
+  "version": "1.0.0",
+  "earth": {
+    "radius": 6371000,
+    "mu": 3.986004418e14
+  },
+  "agents": [
+    {
+      "id": "agent-0",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-1",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 0.6283185307179586
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-2",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.2566370614359172
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-3",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 1.884955592153876
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-4",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 2.5132741228718344
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-5",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.141592653589793
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-6",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 3.7699111843077517
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-7",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 4.39822971502571
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-8",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.026548245743669
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    },
+    {
+      "id": "agent-9",
+      "orbit": {
+        "a": 6871000,
+        "e": 0.1,
+        "i": 0.7853981633974483,
+        "Ω": 0,
+        "ω": 0,
+        "ν": 5.654866776461628
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "ring"
+      }
+    }
+  ],
+  "sim": {
+    "timeStep": 1.0,
+    "initialTime": 0,
+    "maxTime": 3600
+  },
+  "seed": "demo-scenario"
+}

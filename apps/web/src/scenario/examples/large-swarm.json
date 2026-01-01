@@ -1,0 +1,33 @@
+{
+  "name": "Large Swarm",
+  "description": "500 agents in various orbits with all behaviors enabled",
+  "version": "1.0.0",
+  "earth": {
+    "radius": 6371000,
+    "mu": 3.986004418e14
+  },
+  "agents": [
+    {
+      "id": "agent-0",
+      "orbit": {
+        "a": 6971000,
+        "e": 0.15,
+        "i": 0.5235987755982988,
+        "Ω": 0.7853981633974483,
+        "ω": 1.5707963267948966,
+        "ν": 0.3141592653589793
+      },
+      "behaviors": {
+        "cohesion": true,
+        "separation": true,
+        "alignment": true,
+        "formation": "none"
+      }
+    }
+  ],
+  "sim": {
+    "timeStep": 1.0,
+    "initialTime": 0
+  },
+  "seed": "large-swarm-default"
+}

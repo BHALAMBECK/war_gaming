@@ -1,0 +1,35 @@
+# UI/UX Constraints
+
+## Design Principles
+- Clean, demo-ready UI. Avoid clutter.
+- Minimal controls: one right-side panel maximum.
+- Provide "demo presets" for quick showcase scenarios.
+
+## UI Components
+- Right-side panel: collapsible, contains all controls.
+- HUD: minimal overlay (FPS, sim time, agent count).
+- Hide UI button: one-click toggle for recording (hides all UI).
+
+## Controls Organization
+- Time controls: play/pause, time scale, step, seed input.
+- Camera controls: preset selector (cinematic, follow, freecam).
+- Scenario controls: load/save, reset.
+- Swarm controls: behavior toggles, formation presets (later milestones).
+
+## Hotkeys
+- `C`: Cycle camera presets.
+- `H`: Hide/show UI.
+- `Space`: Play/pause.
+- `R`: Reset scenario.
+- Document hotkeys in UI tooltip or README.
+
+## Demo Mode
+- "Demo" button: plays prebuilt scenario sequence.
+- Auto-hides UI after 2 seconds.
+- Loops or resets at end.
+- Optimized for 30-60 second LinkedIn clips.
+
+## Styling
+- Dark theme (space aesthetic).
+- High contrast for readability.
+- Minimal animations (smooth transitions, no distracting effects).
