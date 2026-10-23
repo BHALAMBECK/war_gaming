@@ -1,19 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
+/* Ferrari F1 / Scuderia palette: Rosso Corsa, carbon black, shield yellow */
 :root {
-  --ops-bg: #070b10;
-  --ops-panel: #0c1218;
-  --ops-panel-2: #101820;
-  --ops-border: #1c2a38;
-  --ops-border-strong: #2a4054;
-  --ops-accent: #3d9a8b;
-  --ops-accent-dim: rgba(61, 154, 139, 0.18);
-  --ops-warn: #c4a35a;
-  --ops-danger: #c45c5c;
-  --ops-friendly: #4ade80;
-  --ops-enemy: #f87171;
-  --ops-text: #d0d7de;
-  --ops-muted: #6e7f90;
+  --ops-bg: #080808;
+  --ops-panel: #0e0e0e;
+  --ops-panel-2: #161616;
+  --ops-border: #2a2a2a;
+  --ops-border-strong: #3d3d3d;
+  --ops-accent: #e10600;
+  --ops-accent-dim: rgba(225, 6, 0, 0.2);
+  --ops-warn: #fff200;
+  --ops-danger: #ff2800;
+  --ops-friendly: #e10600;
+  --ops-enemy: #f0f0f0;
+  --ops-text: #f2f2f2;
+  --ops-muted: #8a8a8a;
   --ops-font: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   --ops-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
@@ -38,9 +39,15 @@
   align-items: center;
   gap: 12px;
   padding: 0 14px;
-  background: linear-gradient(180deg, #0e1620 0%, #0a1016 100%);
-  border-bottom: 1px solid var(--ops-border);
+  background: linear-gradient(
+    180deg,
+    #1a0505 0%,
+    #0a0a0a 55%,
+    #080808 100%
+  );
+  border-bottom: 2px solid var(--ops-accent);
   pointer-events: auto;
+  box-shadow: inset 0 -1px 0 rgba(255, 242, 0, 0.15);
 }
 
 .ops-brand {
@@ -50,11 +57,12 @@
   text-transform: uppercase;
   color: var(--ops-accent);
   margin-right: 8px;
+  text-shadow: 0 0 18px rgba(225, 6, 0, 0.35);
 }
 
 .ops-brand span {
-  color: var(--ops-muted);
-  font-weight: 500;
+  color: var(--ops-warn);
+  font-weight: 600;
   letter-spacing: 0.08em;
 }
 
@@ -80,12 +88,12 @@
 .ops-panel {
   background: linear-gradient(
       165deg,
-      rgba(16, 28, 36, 0.92) 0%,
-      rgba(8, 12, 18, 0.88) 100%
+      rgba(28, 8, 8, 0.94) 0%,
+      rgba(10, 10, 10, 0.9) 100%
     ),
     radial-gradient(
       ellipse at top left,
-      rgba(61, 154, 139, 0.06),
+      rgba(225, 6, 0, 0.12),
       transparent 55%
     );
   border-right: 1px solid var(--ops-border);
@@ -118,11 +126,17 @@
   justify-content: space-between;
   padding: 10px 12px;
   border-bottom: 1px solid var(--ops-border);
+  border-top: 2px solid var(--ops-warn);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ops-muted);
+  color: var(--ops-warn);
+  background: linear-gradient(
+    90deg,
+    rgba(225, 6, 0, 0.18) 0%,
+    transparent 60%
+  );
 }
 
 .ops-panel-body {
@@ -130,7 +144,7 @@
   overflow: auto;
   padding: 10px 12px;
   scrollbar-width: thin;
-  scrollbar-color: var(--ops-border-strong) transparent;
+  scrollbar-color: var(--ops-accent) transparent;
 }
 
 .ops-btn {
@@ -149,22 +163,26 @@
 .ops-btn:hover {
   border-color: var(--ops-accent);
   color: #fff;
+  background: rgba(225, 6, 0, 0.12);
 }
 
 .ops-btn.active {
-  background: var(--ops-accent-dim);
+  background: var(--ops-accent);
   border-color: var(--ops-accent);
-  color: var(--ops-accent);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 242, 0, 0.35);
 }
 
 .ops-btn.danger {
-  border-color: rgba(196, 92, 92, 0.5);
+  border-color: rgba(255, 40, 0, 0.65);
   color: var(--ops-danger);
 }
 
 .ops-btn.danger.active,
 .ops-btn.danger:hover {
-  background: rgba(196, 92, 92, 0.15);
+  background: rgba(225, 6, 0, 0.28);
+  color: #fff;
+  border-color: var(--ops-accent);
 }
 
 .ops-btn-group {
@@ -196,7 +214,7 @@
   gap: 8px;
   padding: 4px 0;
   font-size: 12px;
-  border-bottom: 1px solid rgba(28, 42, 56, 0.6);
+  border-bottom: 1px solid rgba(60, 20, 20, 0.55);
 }
 
 .ops-stat-row .k {
@@ -221,13 +239,14 @@
 }
 
 .ops-entity:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(225, 6, 0, 0.08);
   border-color: var(--ops-border);
 }
 
 .ops-entity.selected {
   background: var(--ops-accent-dim);
   border-color: var(--ops-accent);
+  box-shadow: inset 2px 0 0 var(--ops-warn);
 }
 
 .ops-dot {
@@ -238,10 +257,12 @@
 
 .ops-dot.friendly {
   background: var(--ops-friendly);
+  box-shadow: 0 0 6px rgba(225, 6, 0, 0.7);
 }
 
 .ops-dot.enemy {
   background: var(--ops-enemy);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
 }
 
 .ops-section-title {
@@ -249,7 +270,7 @@
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ops-muted);
+  color: var(--ops-warn);
 }
 
 .ops-feed {
@@ -278,11 +299,11 @@
 .ops-hp > i {
   display: block;
   height: 100%;
-  background: var(--ops-accent);
+  background: linear-gradient(90deg, #a00000, var(--ops-accent));
 }
 
 .ops-hp.low > i {
-  background: var(--ops-danger);
+  background: var(--ops-warn);
 }
 
 .ops-overlay-controls {
@@ -300,8 +321,9 @@
   font-family: var(--ops-mono);
   font-size: 12px;
   padding: 4px 8px;
-  border: 1px solid var(--ops-border);
-  background: rgba(8, 12, 18, 0.75);
+  border: 1px solid var(--ops-accent);
+  background: rgba(20, 0, 0, 0.75);
+  color: var(--ops-warn);
   margin-left: auto;
 }
 

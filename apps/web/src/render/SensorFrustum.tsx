@@ -38,7 +38,7 @@ export function SensorFrustum() {
       <mesh position={[0, rangeScene / 2, 0]}>
         <coneGeometry args={[radius, rangeScene, 20, 1, true]} />
         <meshBasicMaterial
-          color="#3d9a8b"
+          color="#e10600"
           transparent
           opacity={0.14}
           side={DoubleSide}

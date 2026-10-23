@@ -289,7 +289,8 @@ export function Agents() {
         tempColor.set('#00ffff'); // Cyan for hovered
       } else {
         // Base color based on team
-        tempColor.set(agent.team === 'friendly' ? '#39ff14' : '#ff4444'); // Neon green for friendly, red for enemy
+        // Ferrari F1 palette: rosso friendly, silver/white enemy
+        tempColor.set(agent.team === 'friendly' ? '#e10600' : '#e8e8e8');
       }
       instancedMeshRef.current!.setColorAt(index, tempColor);
     });

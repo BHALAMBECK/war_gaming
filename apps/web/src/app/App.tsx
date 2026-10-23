@@ -105,7 +105,7 @@ function App() {
         width: '100%',
         height: '100%',
         position: 'relative',
-        background: 'var(--ops-bg, #070b10)',
+        background: 'var(--ops-bg, #080808)',
       }}
     >
       <Canvas
@@ -116,7 +116,7 @@ function App() {
           inset: 0,
           width: '100%',
           height: '100%',
-          background: '#05080c',
+          background: '#050505',
         }}
       >
         <SceneBootstrap />

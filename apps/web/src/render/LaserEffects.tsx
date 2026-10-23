@@ -23,7 +23,7 @@ function BeamLine({
   return (
     <line>
       <primitive object={geometry} attach="geometry" />
-      <lineBasicMaterial color="#ff6b4a" />
+      <lineBasicMaterial color="#fff200" />
     </line>
   );
 }
