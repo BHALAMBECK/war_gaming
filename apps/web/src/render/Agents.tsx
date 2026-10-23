@@ -284,11 +284,10 @@ export function Agents() {
       
       // Set color based on team, with hover/selected highlighting
       if (agent.selected) {
-        tempColor.set('#ffff00'); // Yellow for selected
+        tempColor.set('#fff200'); // Scuderia yellow selected
       } else if (agent.hovered) {
-        tempColor.set('#00ffff'); // Cyan for hovered
+        tempColor.set('#ff6b4a'); // Warm hover
       } else {
-        // Base color based on team
         // Ferrari F1 palette: rosso friendly, silver/white enemy
         tempColor.set(agent.team === 'friendly' ? '#e10600' : '#e8e8e8');
       }
