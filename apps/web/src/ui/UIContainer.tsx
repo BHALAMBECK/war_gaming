@@ -17,7 +17,6 @@ interface UIContainerProps {
 export function UIContainer({ 
   hidden, 
   onToggleHide,
-  performanceOverlayVisible,
   onPerformanceOverlayToggle,
 }: UIContainerProps) {
   if (hidden) {
@@ -32,7 +31,7 @@ export function UIContainer({
   return (
     <>
       <HideUIButton onToggle={onToggleHide} />
-      <DemoButton onUIHide={onToggleHide} />
+      <DemoButton onUIHide={() => onToggleHide(true)} />
       <PerformanceToggle onToggle={onPerformanceOverlayToggle} />
       <CameraPanel />
       <TimeControlPanel />

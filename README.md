@@ -8,13 +8,11 @@ OSWV is a visual sandbox for entertainment and education. It demonstrates orbita
 
 ## Safety Guardrails
 
-This project is **NOT** designed for real-world weaponization. We do NOT implement:
-- Targeting systems
-- Weapon effects
-- Intercept guidance
-- Jamming or sensor simulation mirroring operational kill chains
+This project is an **entertainment / education sandbox**, not an operational kill-chain trainer.
 
-Swarm behaviors are abstract (cohesion, separation, alignment, formation, task allocation) and not framed as attack behaviors.
+Abstract LOS lasers and onboard cameras exist as **game mechanics** (range, Earth occultation, cooldown, HP). We do **not** model real weapon effects, guidance, jamming, or classified sensor phenomenology.
+
+Swarm behaviors remain abstract (cohesion, separation, alignment, formation, task allocation).
 
 ## Quick Start
 
@@ -51,15 +49,22 @@ apps/web/src/
 
 See [docs/MILESTONES.md](docs/MILESTONES.md) for detailed milestone tracking.
 
-**Current Status**: Milestone 0 complete ✅
+**Current Status**: Ops modernization — Lattice-style three-panel shell, fidelity-tiered propagator, solar map, mission ops hub
 
 ## Tech Stack
 
 - **Vite** + **React** + **TypeScript**
-- **Three.js** via **react-three-fiber** (R3F)
+- **Three.js** via **react-three-fiber** (R3F) — no Cesium, no paid map services
 - **Zustand** for state management
 - **Vitest** for testing
 - **ESLint** + **Prettier** for code quality
+
+## Ops UI
+
+- **Earth** globe view (tracks, FOV cones, laser beams)
+- **Solar map** (Sun + planets, free procedural)
+- **Fidelity slider**: Kepler → Kepler+J2 → RK4+J2
+- **Mission Ops** hub: telemetry, camera snapshots, LOS laser engagements
 
 ## Development
 

@@ -227,7 +227,7 @@ describe('scenario', () => {
       };
 
       // Load scenario
-      loadScenarioDirect(originalScenario);
+      loadScenario(originalScenario);
 
       // Save scenario
       const savedScenario = saveScenario(
@@ -284,7 +284,7 @@ describe('scenario', () => {
 
       // Load scenario first time
       setSeed(scenario.seed);
-      loadScenarioDirect(scenario);
+      loadScenario(scenario);
       const agents1 = useAgentStore.getState().agents;
       const state1 = agents1[0].state;
 

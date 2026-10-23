@@ -25,6 +25,15 @@
     }
   },
   "include": ["src"],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.integration.test.tsx",
+    "src/**/*.component.test.tsx",
+    "src/**/*.determinism.test.ts",
+    "src/**/*.performance.test.ts",
+    "src/test"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
 

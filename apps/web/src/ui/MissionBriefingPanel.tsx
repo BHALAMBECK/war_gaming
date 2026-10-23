@@ -200,7 +200,3 @@ const itemDescriptionStyle: React.CSSProperties = {
   paddingLeft: '8px',
 };
 
-const highlightStyle: React.CSSProperties = {
-  color: 'rgba(255, 255, 255, 0.95)',
-  fontWeight: '500',
-};

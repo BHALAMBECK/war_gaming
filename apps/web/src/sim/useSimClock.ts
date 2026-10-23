@@ -14,9 +14,6 @@ export function useSimClock() {
     paused,
     timeScale,
     seed,
-    setPaused,
-    setTimeScale,
-    setSeed,
     setSimTime,
     setClockInstance,
   } = useSimClockStore();

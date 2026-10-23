@@ -4,13 +4,15 @@ import { InstancedMesh, Object3D, Color } from 'three';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
-import { propagateKeplerBatch } from '@/sim/orbit/propagator';
+import { propagateOrbitBatch } from '@/sim/orbit/propagator';
 import { eciToScene } from './utils/coordinateConversion';
 import { computeSwarmForces, enforceMinimumSeparation, DEFAULT_BEHAVIOR_PARAMS } from '@/sim/swarm';
 import { allocateTasks, updateObjectiveState } from '@/sim/tasks/allocation';
 import { computeObjectiveSteeringBatch } from '@/sim/tasks/steering';
 import { DEFAULT_OBJECTIVE_STEERING_PARAMS } from '@/sim/tasks/types';
 import { ObjectiveType } from '@/sim/tasks/types';
+import { useOpsStore } from '@/ui/stores/opsStore';
+import { useSystemsStore } from '@/ui/stores/systemsStore';
 
 const tempObject = new Object3D();
 const tempColor = new Color();
@@ -24,6 +26,8 @@ export function Agents() {
   const { raycaster, camera, pointer, gl } = useThree();
   const { agents, updateAgentsBatch, selectAgent, hoverAgent, clearSelection } = useAgentStore();
   const { clockInstance, paused } = useSimClockStore();
+  const fidelity = useOpsStore((s) => s.fidelity);
+  const pruneBeams = useSystemsStore((s) => s.pruneBeams);
   const { objectives, updateObjective, completeObjective, updateTimer, timerRunning } = useTaskStore();
 
   // Track last sim time to calculate delta
@@ -64,9 +68,14 @@ export function Agents() {
         const playerControlledAgents = agents.filter((a) => playerControlledIds.has(a.id));
         const autoAgents = agents.filter((a) => !playerControlledIds.has(a.id));
         
-        // Propagate player-controlled agents with pure Kepler (no steering)
+        // Propagate player-controlled agents (no steering)
         const playerStates = playerControlledAgents.map((agent) => agent.state);
-        const propagatedPlayerStates = propagateKeplerBatch(playerStates, simDelta);
+        const propagatedPlayerStates = propagateOrbitBatch(
+          playerStates,
+          simDelta,
+          fidelity
+        );
+        pruneBeams(currentSimTime);
         const playerUpdates = playerControlledAgents.map((agent, index) => ({
           id: agent.id,
           state: propagatedPlayerStates[index]!,
@@ -145,7 +154,11 @@ export function Agents() {
           });
           
           // Propagate auto agents in batch with adjusted velocities
-          const propagatedAutoStates = propagateKeplerBatch(adjustedStates, simDelta);
+          const propagatedAutoStates = propagateOrbitBatch(
+            adjustedStates,
+            simDelta,
+            fidelity
+          );
           
           // Combine player-controlled and auto agent updates
           const autoUpdates = autoAgents.map((agent, index) => ({
@@ -231,7 +244,11 @@ export function Agents() {
             });
             
             // Propagate auto agents in batch with adjusted velocities
-            const propagatedAutoStates = propagateKeplerBatch(adjustedStates, simDelta);
+            const propagatedAutoStates = propagateOrbitBatch(
+              adjustedStates,
+              simDelta,
+              fidelity
+            );
             
             // Combine player-controlled and auto agent updates
             const autoUpdates = autoAgents.map((agent, index) => ({

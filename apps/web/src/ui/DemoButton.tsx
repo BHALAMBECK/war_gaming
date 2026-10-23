@@ -3,7 +3,8 @@
  */
 
 import { useState } from 'react';
-import { startDemo, ExampleScenarioName } from './demo/demoMode';
+import { startDemo } from './demo/demoMode';
+import type { ExampleScenarioName } from './demo/demoMode';
 
 interface DemoButtonProps {
   onUIHide?: () => void;

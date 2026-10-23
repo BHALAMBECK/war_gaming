@@ -4,6 +4,7 @@
 
 import { CartesianState } from '@/sim/orbit/types';
 import { BehaviorFlags, Team } from '@/scenario/types';
+import { AgentSystems } from '@/sim/systems/types';
 
 /**
  * Agent with rendering metadata.
@@ -19,6 +20,8 @@ export interface Agent {
   team: Team;
   /** Remaining delta-v budget in m/s */
   dvRemaining: number;
+  /** Onboard sensors / abstract weapons */
+  systems?: AgentSystems;
   /** Whether this agent is currently selected */
   selected?: boolean;
   /** Whether this agent is currently hovered */

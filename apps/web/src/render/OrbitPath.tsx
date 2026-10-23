@@ -75,7 +75,7 @@ export function OrbitPath() {
           itemSize={3}
         />
       </bufferGeometry>
-      <lineBasicMaterial color="#00ffff" opacity={0.5} transparent lineWidth={1} />
+      <lineBasicMaterial color="#00ffff" opacity={0.5} transparent />
     </line>
   );
 }

@@ -10,6 +10,7 @@ import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
 import { setSeed } from '@/util/seed';
+import { createDefaultSystems } from '@/sim/systems/types';
 
 /**
  * Convert scenario agent definition to Agent format.
@@ -31,14 +32,16 @@ export function scenarioToAgents(scenario: Scenario): Agent[] {
       state = elementsToCartesian(elements);
     }
 
+    const team = agentScenario.team ?? 'friendly';
     agents.push({
       id: agentScenario.id,
       state,
       behaviors: agentScenario.behaviors,
       // Default to 'friendly' if team is not specified (backward compatibility)
-      team: agentScenario.team ?? 'friendly',
+      team,
       // Default to 1000 m/s if dvRemaining is not specified (backward compatibility)
       dvRemaining: agentScenario.dvRemaining ?? 1000,
+      systems: createDefaultSystems(team),
       selected: false,
       hovered: false,
     });

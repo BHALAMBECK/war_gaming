@@ -2,9 +2,9 @@
  * Scenario saver: exports current app state to Scenario format.
  */
 
-import { Scenario, AgentScenario, BehaviorFlags, FormationType } from './types';
+import { Scenario, AgentScenario } from './types';
 import { Agent } from '@/render/Agents.types';
-import { OrbitalElements, CartesianState } from '@/sim/orbit/types';
+import { OrbitalElements } from '@/sim/orbit/types';
 import { cartesianToElements } from '@/sim/orbit/conversions';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
