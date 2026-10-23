@@ -17,6 +17,7 @@ interface AgentState {
   getSelectedAgent: () => Agent | null;
   applyDeltaVToAgent: (id: string, rtnVector: [number, number, number]) => void;
   updateAgentDvRemaining: (id: string, dvRemaining: number) => void;
+  patchAgent: (id: string, patch: Partial<Agent>) => void;
 }
 
 export const useAgentStore = create<AgentState>((set, get) => ({
@@ -110,6 +111,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set((current) => ({
       agents: current.agents.map((agent) =>
         agent.id === id ? { ...agent, dvRemaining: Math.max(0, dvRemaining) } : agent
+      ),
+    }));
+  },
+  patchAgent: (id, patch) => {
+    set((current) => ({
+      agents: current.agents.map((agent) =>
+        agent.id === id ? { ...agent, ...patch } : agent
       ),
     }));
   },

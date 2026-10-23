@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+/* Ferrari F1 / Scuderia palette: Rosso Corsa, carbon black, shield yellow */
+:root {
+  --ops-bg: #080808;
+  --ops-panel: #0e0e0e;
+  --ops-panel-2: #161616;
+  --ops-border: #2a2a2a;
+  --ops-border-strong: #3d3d3d;
+  --ops-accent: #e10600;
+  --ops-accent-dim: rgba(225, 6, 0, 0.2);
+  --ops-warn: #fff200;
+  --ops-danger: #ff2800;
+  --ops-friendly: #e10600;
+  --ops-enemy: #f0f0f0;
+  --ops-text: #f2f2f2;
+  --ops-muted: #8a8a8a;
+  --ops-font: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --ops-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+.ops-shell {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  pointer-events: none;
+  z-index: 40;
+  font-family: var(--ops-font);
+  color: var(--ops-text);
+}
+
+.ops-shell * {
+  box-sizing: border-box;
+}
+
+.ops-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: linear-gradient(
+    180deg,
+    #1a0505 0%,
+    #0a0a0a 55%,
+    #080808 100%
+  );
+  border-bottom: 2px solid var(--ops-accent);
+  pointer-events: auto;
+  box-shadow: inset 0 -1px 0 rgba(255, 242, 0, 0.15);
+}
+
+.ops-brand {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--ops-accent);
+  margin-right: 8px;
+  text-shadow: 0 0 18px rgba(225, 6, 0, 0.35);
+}
+
+.ops-brand span {
+  color: var(--ops-warn);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.ops-body {
+  display: grid;
+  grid-template-columns: 280px 1fr 340px;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.ops-body.left-collapsed {
+  grid-template-columns: 0 1fr 340px;
+}
+
+.ops-body.right-collapsed {
+  grid-template-columns: 280px 1fr 0;
+}
+
+.ops-body.both-collapsed {
+  grid-template-columns: 0 1fr 0;
+}
+
+.ops-panel {
+  background: linear-gradient(
+      165deg,
+      rgba(28, 8, 8, 0.94) 0%,
+      rgba(10, 10, 10, 0.9) 100%
+    ),
+    radial-gradient(
+      ellipse at top left,
+      rgba(225, 6, 0, 0.12),
+      transparent 55%
+    );
+  border-right: 1px solid var(--ops-border);
+  pointer-events: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  backdrop-filter: blur(8px);
+}
+
+.ops-panel.right {
+  border-right: none;
+  border-left: 1px solid var(--ops-border);
+}
+
+.ops-center {
+  position: relative;
+  pointer-events: none;
+  min-width: 0;
+}
+
+.ops-center > * {
+  pointer-events: auto;
+}
+
+.ops-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ops-border);
+  border-top: 2px solid var(--ops-warn);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ops-warn);
+  background: linear-gradient(
+    90deg,
+    rgba(225, 6, 0, 0.18) 0%,
+    transparent 60%
+  );
+}
+
+.ops-panel-body {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ops-accent) transparent;
+}
+
+.ops-btn {
+  appearance: none;
+  border: 1px solid var(--ops-border-strong);
+  background: var(--ops-panel-2);
+  color: var(--ops-text);
+  font-family: var(--ops-font);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.ops-btn:hover {
+  border-color: var(--ops-accent);
+  color: #fff;
+  background: rgba(225, 6, 0, 0.12);
+}
+
+.ops-btn.active {
+  background: var(--ops-accent);
+  border-color: var(--ops-accent);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 242, 0, 0.35);
+}
+
+.ops-btn.danger {
+  border-color: rgba(255, 40, 0, 0.65);
+  color: var(--ops-danger);
+}
+
+.ops-btn.danger.active,
+.ops-btn.danger:hover {
+  background: rgba(225, 6, 0, 0.28);
+  color: #fff;
+  border-color: var(--ops-accent);
+}
+
+.ops-btn-group {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.ops-slider {
+  width: 100%;
+  accent-color: var(--ops-accent);
+  cursor: pointer;
+}
+
+.ops-label {
+  display: block;
+  font-size: 11px;
+  color: var(--ops-muted);
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+
+.ops-mono {
+  font-family: var(--ops-mono);
+}
+
+.ops-stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(60, 20, 20, 0.55);
+}
+
+.ops-stat-row .k {
+  color: var(--ops-muted);
+}
+
+.ops-stat-row .v {
+  font-family: var(--ops-mono);
+  color: var(--ops-text);
+}
+
+.ops-entity {
+  display: grid;
+  grid-template-columns: 8px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.ops-entity:hover {
+  background: rgba(225, 6, 0, 0.08);
+  border-color: var(--ops-border);
+}
+
+.ops-entity.selected {
+  background: var(--ops-accent-dim);
+  border-color: var(--ops-accent);
+  box-shadow: inset 2px 0 0 var(--ops-warn);
+}
+
+.ops-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.ops-dot.friendly {
+  background: var(--ops-friendly);
+  box-shadow: 0 0 6px rgba(225, 6, 0, 0.7);
+}
+
+.ops-dot.enemy {
+  background: var(--ops-enemy);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+}
+
+.ops-section-title {
+  margin: 14px 0 8px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ops-warn);
+}
+
+.ops-feed {
+  font-family: var(--ops-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ops-muted);
+  max-height: 160px;
+  overflow: auto;
+}
+
+.ops-feed .hit {
+  color: var(--ops-warn);
+}
+
+.ops-feed .miss {
+  color: var(--ops-muted);
+}
+
+.ops-hp {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
+}
+
+.ops-hp > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #a00000, var(--ops-accent));
+}
+
+.ops-hp.low > i {
+  background: var(--ops-warn);
+}
+
+.ops-overlay-controls {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.ops-time-chip {
+  font-family: var(--ops-mono);
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--ops-accent);
+  background: rgba(20, 0, 0, 0.75);
+  color: var(--ops-warn);
+  margin-left: auto;
+}
+
+@media (max-width: 960px) {
+  .ops-body {
+    grid-template-columns: 0 1fr 0;
+  }
+
+  .ops-panel {
+    display: none;
+  }
+}

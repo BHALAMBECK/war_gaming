@@ -91,7 +91,7 @@ export function computeCohesion(
 export function computeSeparation(
   agents: LocalFrameState[],
   agentIndex: number,
-  localFrame: LocalFrame,
+  _localFrame: LocalFrame,
   params: BehaviorParams
 ): [number, number, number] {
   if (agents.length <= 1) {

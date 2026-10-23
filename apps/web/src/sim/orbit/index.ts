@@ -8,4 +8,7 @@ export * from './types';
 export * from './constants';
 export * from './conversions';
 export * from './propagator';
+export * from './j2';
+export * from './rk4';
+export * from './fidelity';
 

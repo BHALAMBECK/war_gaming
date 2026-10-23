@@ -52,11 +52,16 @@ OSWV follows a layered architecture with clear separation between rendering, sim
 - **No simulation or rendering** - data structures only
 
 ### UI Layer (`apps/web/src/ui/`)
-- Control panels (time, camera, scenario, swarm)
-- HUD overlay (FPS, sim time, agent count)
-- Hotkey handling
+- Lattice-style three-panel ops shell (`ui/ops/`)
+- Tracks list, mission ops analysis hub, fidelity + view-mode controls
+- Legacy tools drawer (time, camera, scenario, maneuver, tasks)
 - Demo mode orchestration
 - **No direct sim/render access** - communicates via Zustand stores
+
+### Systems Layer (`apps/web/src/sim/systems/`)
+- Onboard camera FOV + Earth LOS imaging helpers
+- Abstract LOS laser engagements (sandbox game mechanics)
+- Telemetry / neighbor analysis for the ops hub
 
 ## Data Flow
 

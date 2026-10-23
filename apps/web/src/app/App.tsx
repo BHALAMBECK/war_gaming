@@ -10,46 +10,28 @@ import { Agents } from '@/render/Agents';
 import { OrbitPath } from '@/render/OrbitPath';
 import { Objectives } from '@/render/Objectives';
 import { TrajectoryPreview } from '@/render/TrajectoryPreview';
-import { UIContainer } from '@/ui/UIContainer';
+import { SolarSystem } from '@/render/SolarSystem';
+import { SensorFrustum } from '@/render/SensorFrustum';
+import { LaserEffects } from '@/render/LaserEffects';
+import { OpsShell } from '@/ui/ops/OpsShell';
 import { PerformanceOverlay } from '@/ui/PerformanceOverlay';
 import { PerformanceTracker } from '@/ui/PerformanceTracker';
 import { useCameraStore } from '@/ui/stores/cameraStore';
+import { useOpsStore } from '@/ui/stores/opsStore';
 import { useSimClock } from '@/sim/useSimClock';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
 import { generateTestAgents } from '@/util/generateTestAgents';
 
-function Scene() {
+function EarthScene() {
   const preset = useCameraStore((state) => state.preset);
   const enableOrbitControls = preset === 'freecam';
-  const setAgents = useAgentStore((state) => state.setAgents);
-  const currentScenario = useScenarioStore((state) => state.currentScenario);
-  const loadScenario = useScenarioStore((state) => state.loadScenario);
-  
-  // Initialize sim clock hook (runs in render loop)
-  useSimClock();
 
-  // Initialize agents on mount - use scenario if available, otherwise generate test agents
-  useEffect(() => {
-    if (currentScenario) {
-      // Scenario is already loaded via store, but ensure agents are set
-      // The scenario loader should have already set them, but this is a safety check
-      loadScenario(currentScenario);
-    } else {
-      // Default: generate test agents if no scenario is loaded
-      const testAgents = generateTestAgents(500);
-      setAgents(testAgents);
-    }
-  }, [setAgents, currentScenario, loadScenario]);
+  useSimClock();
 
   return (
     <>
-      {/* Camera setup */}
-      <PerspectiveCamera
-        makeDefault
-        position={[0, 0, 5]}
-        fov={50}
-      />
+      <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
       {enableOrbitControls && (
         <OrbitControls
           enablePan={true}
@@ -59,65 +41,100 @@ function Scene() {
           maxDistance={20}
         />
       )}
-      
-      {/* Camera controller for presets */}
       <CameraController />
-      
-      {/* Lighting */}
       <Lighting />
-      
-      {/* Starfield background */}
       <Starfield />
-      
-      {/* Earth */}
       <Earth radius={1} />
-      
-      {/* Moon */}
       <Moon />
-      
-      {/* Agents */}
       <Agents />
-      
-      {/* Orbit path for selected agent */}
       <OrbitPath />
-      
-      {/* Trajectory preview for planned maneuver */}
       <TrajectoryPreview />
-      
-      {/* Objectives */}
       <Objectives />
+      <SensorFrustum />
+      <LaserEffects />
     </>
   );
 }
 
-function App() {
-  const [uiHidden, setUIHidden] = useState(false);
-  const [performanceOverlayVisible, setPerformanceOverlayVisible] = useState(false);
-  const [fps, setFps] = useState(0);
+function SolarScene() {
+  useSimClock();
 
   return (
     <>
+      <PerspectiveCamera makeDefault position={[0, 8, 18]} fov={50} />
+      <OrbitControls
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        minDistance={1}
+        maxDistance={80}
+      />
+      <Starfield />
+      <SolarSystem />
+    </>
+  );
+}
+
+function SceneBootstrap() {
+  const setAgents = useAgentStore((state) => state.setAgents);
+  const currentScenario = useScenarioStore((state) => state.currentScenario);
+  const loadScenario = useScenarioStore((state) => state.loadScenario);
+
+  useEffect(() => {
+    if (currentScenario) {
+      loadScenario(currentScenario);
+    } else {
+      const testAgents = generateTestAgents(500);
+      setAgents(testAgents);
+    }
+  }, [setAgents, currentScenario, loadScenario]);
+
+  return null;
+}
+
+function App() {
+  const [uiHidden, setUIHidden] = useState(false);
+  const [performanceOverlayVisible, setPerformanceOverlayVisible] =
+    useState(false);
+  const [fps, setFps] = useState(0);
+  const viewMode = useOpsStore((s) => s.viewMode);
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        background: 'var(--ops-bg, #080808)',
+      }}
+    >
       <Canvas
         gl={{ antialias: true }}
         dpr={[1, 2]}
-        style={{ width: '100%', height: '100%', background: '#000' }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          background: '#050505',
+        }}
       >
-        <Scene />
-        <PerformanceTracker 
+        <SceneBootstrap />
+        {viewMode === 'earth' ? <EarthScene /> : <SolarScene />}
+        <PerformanceTracker
           enabled={performanceOverlayVisible}
-          onFpsUpdate={setFps} 
+          onFpsUpdate={setFps}
         />
       </Canvas>
-      <UIContainer 
-        hidden={uiHidden} 
+      <OpsShell
+        hidden={uiHidden}
         onToggleHide={setUIHidden}
         performanceOverlayVisible={performanceOverlayVisible}
         onPerformanceOverlayToggle={setPerformanceOverlayVisible}
       />
       <PerformanceOverlay visible={performanceOverlayVisible} fps={fps} />
-    </>
+    </div>
   );
 }
 
 export default App;
-

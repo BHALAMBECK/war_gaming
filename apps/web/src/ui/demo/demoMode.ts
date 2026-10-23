@@ -9,6 +9,8 @@ import { useCameraStore } from '@/ui/stores/cameraStore';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import type { CameraPreset } from '@/ui/stores/cameraStore';
 
+export type { ExampleScenarioName };
+
 /**
  * Previous state before demo started (for cleanup).
  */
@@ -72,7 +74,7 @@ export function startDemo(
   simClockStore.setPaused(false); // Start simulation
 
   // Schedule UI auto-hide
-  let hideUITimeout: NodeJS.Timeout | null = null;
+  let hideUITimeout: ReturnType<typeof setTimeout> | null = null;
   if (autoHideUIDelay > 0 && onUIHide) {
     hideUITimeout = setTimeout(() => {
       onUIHide();

@@ -29,7 +29,7 @@ import { getFormationTarget } from './formations';
 export function computeSwarmForces(
   agents: Agent[],
   params: BehaviorParams = DEFAULT_BEHAVIOR_PARAMS,
-  deltaTime: number
+  _deltaTime: number
 ): VelocityAdjustment[] {
   if (agents.length === 0) {
     return [];

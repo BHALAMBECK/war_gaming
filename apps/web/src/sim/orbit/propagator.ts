@@ -1,11 +1,15 @@
 /**
  * Orbit propagator using Kepler solver (analytical two-body problem).
  * Provides deterministic, stable propagation for elliptical orbits.
+ * Fidelity tiers also expose J2-aware and RK4 numerical modes.
  */
 
 import { CartesianState, OrbitalElements } from './types';
 import { cartesianToElements, elementsToCartesian } from './conversions';
 import { EARTH_MU } from './constants';
+import { j2Acceleration } from './j2';
+import { propagateRk4 } from './rk4';
+import type { FidelityLevel } from './fidelity';
 
 /**
  * Propagate orbit using Kepler solver.
@@ -22,9 +26,8 @@ export function propagateKepler(
   // Convert to orbital elements
   const elements = cartesianToElements(state);
 
-  // Calculate mean motion and period
-  const n = Math.sqrt(EARTH_MU / (elements.a * elements.a * elements.a)); // Mean motion (rad/s)
-  const period = (2 * Math.PI) / n; // Orbital period (s)
+  // Calculate mean motion (rad/s)
+  const n = Math.sqrt(EARTH_MU / (elements.a * elements.a * elements.a));
 
   // Get current mean anomaly from true anomaly
   const M0 = meanAnomalyFromTrue(elements.ν!, elements.e);
@@ -95,5 +98,53 @@ export function propagateKeplerBatch(
   deltaTime: number
 ): CartesianState[] {
   return states.map((state) => propagateKepler(state, deltaTime));
+}
+
+/**
+ * Medium fidelity: Kepler step + first-order J2 velocity kick (Encke-lite).
+ * Cheap approximation — good visual nodal precession without full RK cost.
+ */
+export function propagateKeplerJ2(
+  state: CartesianState,
+  deltaTime: number
+): CartesianState {
+  const kepler = propagateKepler(state, deltaTime);
+  const aJ2 = j2Acceleration(state.position);
+  return {
+    position: kepler.position,
+    velocity: [
+      kepler.velocity[0] + aJ2[0] * deltaTime,
+      kepler.velocity[1] + aJ2[1] * deltaTime,
+      kepler.velocity[2] + aJ2[2] * deltaTime,
+    ],
+  };
+}
+
+/**
+ * Dispatch propagation by fidelity tier.
+ * 0 = Kepler, 1 = Kepler+J2 kick, 2 = RK4+J2
+ */
+export function propagateOrbit(
+  state: CartesianState,
+  deltaTime: number,
+  fidelity: FidelityLevel = 0
+): CartesianState {
+  switch (fidelity) {
+    case 1:
+      return propagateKeplerJ2(state, deltaTime);
+    case 2:
+      return propagateRk4(state, deltaTime, true);
+    case 0:
+    default:
+      return propagateKepler(state, deltaTime);
+  }
+}
+
+export function propagateOrbitBatch(
+  states: CartesianState[],
+  deltaTime: number,
+  fidelity: FidelityLevel = 0
+): CartesianState[] {
+  return states.map((state) => propagateOrbit(state, deltaTime, fidelity));
 }
 

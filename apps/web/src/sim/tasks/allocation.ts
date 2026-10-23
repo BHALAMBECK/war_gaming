@@ -177,9 +177,7 @@ export function updateObjectiveState(
             // Check velocity threshold if specified (default: 10 m/s)
             const vThreshold = inspectObj.vThreshold ?? 10;
             
-            // Calculate relative velocity magnitude
-            const [ax, ay, az] = agent.state.position;
-            const [ox, oy, oz] = inspectObj.position;
+            // Calculate relative velocity magnitude (objective treated as stationary)
             const [vx, vy, vz] = agent.state.velocity;
             
             // For inspection, we check if the agent is moving slowly relative to the objective

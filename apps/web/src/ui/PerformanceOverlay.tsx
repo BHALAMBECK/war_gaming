@@ -15,7 +15,7 @@ export function PerformanceOverlay({ visible, fps }: PerformanceOverlayProps) {
   if (!visible) return null;
 
   // Color coding for FPS
-  const fpsColor = fps >= 55 ? '#4ade80' : fps >= 30 ? '#fbbf24' : '#f87171';
+  const fpsColor = fps >= 55 ? '#e10600' : fps >= 30 ? '#fff200' : '#ff2800';
 
   return (
     <div

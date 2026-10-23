@@ -22,3 +22,20 @@ export const EARTH_MU = 3.986004418e14; // m³/s²
  */
 export const EARTH_G = 9.80665; // m/s²
 
+/**
+ * Earth's unnormalized J2 zonal harmonic coefficient (WGS84).
+ * Dimensionless.
+ */
+export const EARTH_J2 = 1.08262668e-3;
+
+/**
+ * Astronomical unit in meters.
+ */
+export const AU = 1.495978707e11;
+
+/**
+ * Solar gravitational parameter (μ☉).
+ * Units: m³/s²
+ */
+export const SUN_MU = 1.32712440018e20;
+

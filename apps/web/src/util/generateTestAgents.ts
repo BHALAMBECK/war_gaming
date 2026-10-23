@@ -9,6 +9,7 @@ import { elementsToCartesian } from '@/sim/orbit/conversions';
 import { EARTH_RADIUS } from '@/sim/orbit/constants';
 import { randomFloat } from './seed';
 import { BehaviorFlags, FormationType } from '@/scenario/types';
+import { createDefaultSystems } from '@/sim/systems/types';
 
 /**
  * Generate N test agents with random orbital elements.
@@ -54,6 +55,7 @@ export function generateTestAgents(count: number): Agent[] {
       behaviors,
       team,
       dvRemaining: 1000, // Default delta-v budget: 1000 m/s
+      systems: createDefaultSystems(team),
       selected: false,
       hovered: false,
     });
