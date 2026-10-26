@@ -9,6 +9,7 @@ import { cartesianToElements } from '@/sim/orbit/conversions';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
+import { useOpsStore } from '@/ui/stores/opsStore';
 import { EARTH_RADIUS, EARTH_MU } from '@/sim/orbit/constants';
 
 /**
@@ -27,6 +28,7 @@ function agentToScenario(agent: Agent): AgentScenario {
     orbit: elements as OrbitalElements,
     behaviors: agent.behaviors, // Preserve agent behaviors
     team: agent.team, // Preserve team property
+    dvRemaining: agent.dvRemaining,
   };
 }
 
@@ -53,9 +55,8 @@ export function saveScenario(
   // Convert agents to scenario format
   const agentScenarios: AgentScenario[] = agents.map(agentToScenario);
   
-  // Get sim params from clock store
-  // Note: timeStep is not directly stored, use a default
-  const timeStep = 1.0; // Default time step in seconds
+  const timeStep = simClockStore.timeStep;
+  const fidelity = useOpsStore.getState().fidelity;
   
   // Get objectives from task store (deep clone to avoid mutations)
   const objectives = taskStore.objectives.length > 0
@@ -75,6 +76,7 @@ export function saveScenario(
     sim: {
       timeStep,
       initialTime: simClockStore.simTime,
+      fidelity,
     },
     seed: simClockStore.seed,
     objectives,

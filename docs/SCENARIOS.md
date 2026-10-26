@@ -1,71 +1,62 @@
 # Scenario System
 
-## Overview
+Scenarios are the **experiment config** for OSWV: initial conditions, seed, fixed time step, and propagator fidelity. Same scenario + seed + fidelity + timeStep → same physics under the fixed-step clock.
 
-Scenarios define the initial conditions and rules for a simulation run. They are JSON files that can be saved, loaded, and shared.
-
-## JSON Schema (Placeholder for Milestone 6)
+## Schema
 
 ```typescript
 interface Scenario {
-  // Metadata
   name: string;
   description: string;
   version: string;
-  
-  // Earth parameters
-  earth: {
-    radius: number; // meters
-    // ... other Earth params
-  };
-  
-  // Agent initial conditions
-  agents: Array<{
-    id: string;
-    // Orbital elements or Cartesian state
-    orbit: OrbitalElements | CartesianState;
-    // Behavior flags
-    behaviors: {
-      cohesion: boolean;
-      separation: boolean;
-      alignment: boolean;
-      formation?: FormationType;
-    };
-  }>;
-  
-  // Simulation parameters
+  earth: { radius: number; mu?: number };
+  agents: AgentScenario[];
   sim: {
-    timeStep: number; // seconds
-    maxTime: number; // seconds
-    // ... other sim params
+    timeStep: number;      // fixed physics dt (seconds); honored by sim clock
+    maxTime?: number;      // metadata / export bound (no auto-stop yet)
+    initialTime?: number;  // defaults to 0
+    fidelity?: 0 | 1 | 2;  // 0 Kepler, 1 Kepler+J2, 2 RK4+J2 (default 0)
   };
-  
-  // Seed for deterministic RNG
   seed: string;
+  objectives?: Objective[];
 }
 ```
 
-## Example Scenarios (Placeholder)
+Agents may include `team`, `dvRemaining`, and behavior flags. Validation is Zod-based (`apps/web/src/scenario/schema.ts`).
 
-### Simple Ring Formation
-- 50 agents in circular orbit
-- Ring formation behavior enabled
-- Low Earth Orbit (~400km altitude)
+## Fidelity tiers
 
-### Large Swarm
-- 500 agents in various orbits
-- All behaviors enabled
-- Collision avoidance active
+| Value | Label | Notes |
+|------:|-------|-------|
+| 0 | Kepler (2-body) | Fast research baseline |
+| 1 | Kepler + J2 | Mild Earth-oblateness kick |
+| 2 | RK4 + J2 | Higher-cost numerical step |
 
-### Demo Scenario
-- Pre-configured for 30-60 second demo
-- Optimized visuals
-- Auto-plays with UI hidden
+Sandbox fidelity — not ops-grade ephemeris. Saved scenarios write the current slider value into `sim.fidelity`.
 
-## Implementation Notes
+## Fixed-step determinism
 
-- Scenarios stored in `apps/web/src/scenario/`
-- JSON schema validation on load
-- Save/load via localStorage or file download
-- Deterministic playback: same scenario + seed = same run
+Physics advances in whole `sim.timeStep` increments (accumulator + 50-step/frame cap). Wall-clock FPS does not change the numerical path. Prefer moderate time scales when recording long runs.
 
+## Load / save / export
+
+| Action | Where |
+|--------|--------|
+| Built-in examples | Tools → Scenarios picker |
+| Load/save JSON | Tools → Scenarios (file + localStorage) |
+| Download scenario IC | Tools → Download Scenario |
+| Record trajectory | Mission Ops → Record |
+| Export run bundle | Mission Ops → Export run |
+
+Run export JSON shape: `{ meta, trajectory, events }` with seed, fidelity, timeStep, subsampled states, and engagement/snapshot logs.
+
+## Example catalog
+
+| Name | Description |
+|------|-------------|
+| `demo` | Short cinematic demo |
+| `simple-ring` | Ring formation, LEO |
+| `large-swarm` | Stub JSON; expands to **500** agents at load (`generateLargeSwarm.ts`) |
+| `task-demo` | Task allocation objectives |
+
+Path: `apps/web/src/scenario/examples/`.

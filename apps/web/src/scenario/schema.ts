@@ -82,6 +82,7 @@ const SimParamsSchema: z.ZodType<SimParams> = z.object({
   timeStep: z.number().positive(),
   maxTime: z.number().positive().optional(),
   initialTime: z.number().min(0).optional(),
+  fidelity: z.union([z.literal(0), z.literal(1), z.literal(2)]).optional(),
 });
 
 /**

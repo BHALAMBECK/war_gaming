@@ -277,13 +277,13 @@ describe('simClockStore integration', () => {
         result.current.setClockInstance(clock);
       });
 
-      // Simulate clock update
+      // Fixed step default is 1s — need ≥1s of accumulated sim time
       act(() => {
-        clock.update(0.016);
+        clock.update(1.0);
         result.current.setSimTime(clock.getTime());
       });
 
-      expect(result.current.simTime).toBeCloseTo(0.016, 5);
+      expect(result.current.simTime).toBeCloseTo(1.0, 5);
     });
   });
 });

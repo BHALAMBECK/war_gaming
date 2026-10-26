@@ -8,7 +8,8 @@ import { ManeuverPanel } from '@/ui/ManeuverPanel';
 import { TaskPanel } from '@/ui/TaskPanel';
 import { CameraPanel } from '@/ui/CameraPanel';
 import { ScenarioSection } from '@/ui/ScenarioSection';
-import { useState } from 'react';
+import { startDemo } from '@/ui/demo/demoMode';
+import { useRef, useState } from 'react';
 
 interface OpsShellProps {
   hidden: boolean;
@@ -16,6 +17,12 @@ interface OpsShellProps {
   performanceOverlayVisible: boolean;
   onPerformanceOverlayToggle: (visible: boolean) => void;
 }
+
+const FIDELITY_NOTES: Record<FidelityLevel, string> = {
+  0: 'Two-body Kepler — fast, research baseline',
+  1: 'Kepler + J2 kick — mild Earth oblateness',
+  2: 'RK4 + J2 — higher cost numerical step',
+};
 
 export function OpsShell({
   hidden,
@@ -35,6 +42,15 @@ export function OpsShell({
   const paused = useSimClockStore((s) => s.paused);
   const toggle = useSimClockStore((s) => s.toggle);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const demoCleanupRef = useRef<(() => void) | null>(null);
+
+  const handleDemo = () => {
+    demoCleanupRef.current?.();
+    demoCleanupRef.current = startDemo('demo', {
+      autoHideUIDelay: 2000,
+      onUIHide: () => onToggleHide(true),
+    });
+  };
 
   if (hidden) {
     return (
@@ -89,7 +105,7 @@ export function OpsShell({
           {paused ? 'Play' : 'Pause'}
         </button>
 
-        <div style={{ minWidth: 180, maxWidth: 240 }}>
+        <div style={{ minWidth: 200, maxWidth: 280 }}>
           <label className="ops-label" htmlFor="fidelity-slider">
             Fidelity: {FIDELITY_LABELS[fidelity]}
           </label>
@@ -105,9 +121,22 @@ export function OpsShell({
               setFidelity(Number(e.target.value) as FidelityLevel)
             }
           />
+          <div
+            style={{
+              fontSize: 10,
+              color: 'var(--ops-muted)',
+              marginTop: 2,
+              lineHeight: 1.3,
+            }}
+          >
+            {FIDELITY_NOTES[fidelity]} · sandbox, not ops-grade ephemeris
+          </div>
         </div>
 
         <div className="ops-btn-group">
+          <button type="button" className="ops-btn" onClick={handleDemo}>
+            Demo
+          </button>
           <button
             type="button"
             className={`ops-btn ${leftPanelOpen ? 'active' : ''}`}

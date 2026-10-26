@@ -4,7 +4,7 @@ A browser-based interactive 3D space swarm sandbox. Renders Earth, satellites, o
 
 ## Purpose
 
-OSWV is a visual sandbox for entertainment and education. It demonstrates orbital mechanics, swarm behaviors, and formation flying in a beautiful 3D environment optimized for impressive demos.
+OSWV is a visual sandbox for entertainment, education, and **lightweight orbital research experiments**. It demonstrates orbital mechanics, swarm behaviors, and formation flying in a browser 3D environment—with seeded, fixed-step runs you can export.
 
 ## Safety Guardrails
 
@@ -16,11 +16,13 @@ Swarm behaviors remain abstract (cohesion, separation, alignment, formation, tas
 
 ## Quick Start
 
+Requires **Node.js 20+** (tested on 22).
+
 ```bash
 # Install dependencies
 npm install
 
-# Start dev server
+# Start dev server (Vite, port 3000)
 npm run dev
 
 # Run tests
@@ -32,6 +34,15 @@ npm run lint
 # Build for production
 npm run build
 ```
+
+## Research use
+
+1. Open **Tools → Scenarios** and load a built-in example (or your JSON).
+2. Set **seed**, **time step**, and **fidelity** (Kepler → Kepler+J2 → RK4+J2). These are written into scenario JSON on save.
+3. Physics uses a **fixed `timeStep`** accumulator (not raw frame delta), so FPS should not change the numerical path.
+4. In **Mission Ops**, toggle **Record**, run, then **Export run** for a JSON bundle (`meta`, `trajectory`, `events`).
+
+See [docs/SCENARIOS.md](docs/SCENARIOS.md) for schema and example catalog.
 
 ## Project Structure
 
@@ -63,25 +74,20 @@ See [docs/MILESTONES.md](docs/MILESTONES.md) for detailed milestone tracking.
 
 - **Earth** globe view (tracks, FOV cones, laser beams)
 - **Solar map** (Sun + planets, free procedural)
-- **Fidelity slider**: Kepler → Kepler+J2 → RK4+J2
-- **Mission Ops** hub: telemetry, camera snapshots, LOS laser engagements
+- **Fidelity slider**: Kepler → Kepler+J2 → RK4+J2 (persisted in scenarios)
+- **Mission Ops** hub: telemetry, Record/Export, camera snapshots, LOS laser engagements
+- **Demo** button: loads the demo scenario and auto-hides UI for capture
 
 ## Development
-
-### Plan/Act Protocol
-
-This project uses a strict two-phase workflow:
-1. **PLAN MODE**: Propose plan, file diffs, acceptance checks
-2. **ACT MODE**: Implement exactly the agreed plan
 
 ### Coding Standards
 
 - TypeScript strict mode, no `any`
 - SI units internally (m, s, kg)
-- Deterministic simulation (same seed + scenario = same run)
+- Deterministic simulation (same seed + scenario + fidelity + timeStep = same run)
 - Performance budgets: 60 FPS for 500 agents, 30 FPS for 5,000 agents
 
-See [.cursor/rules/](.cursor/rules/) for detailed coding guidelines.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/MILESTONES.md](docs/MILESTONES.md).
 
 ## License
 

@@ -4,6 +4,8 @@ import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useOpsStore, FIDELITY_LABELS } from '@/ui/stores/opsStore';
 import { useSystemsStore } from '@/ui/stores/systemsStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
+import { useScenarioStore } from '@/ui/stores/scenarioStore';
+import { useRunRecorderStore } from '@/ui/stores/runRecorderStore';
 import {
   computeTelemetry,
   fleetSummary,
@@ -11,6 +13,7 @@ import {
 } from '@/sim/systems/analysis';
 import { findTargetsInFov } from '@/sim/systems/sensors';
 import { attemptLaserFire } from '@/sim/systems/weapons';
+import { buildRunExport, downloadRunExport } from '@/util/runExport';
 
 export function AnalysisHub() {
   const agents = useAgentStore((s) => s.agents);
@@ -20,6 +23,8 @@ export function AnalysisHub() {
   const patchAgent = useAgentStore((s) => s.patchAgent);
   const simTime = useSimClockStore((s) => s.simTime);
   const formatTime = useSimClockStore((s) => s.formatTime);
+  const seed = useSimClockStore((s) => s.seed);
+  const timeStep = useSimClockStore((s) => s.timeStep);
   const fidelity = useOpsStore((s) => s.fidelity);
   const engagementArmed = useOpsStore((s) => s.engagementArmed);
   const setEngagementArmed = useOpsStore((s) => s.setEngagementArmed);
@@ -30,6 +35,24 @@ export function AnalysisHub() {
   const addBeam = useSystemsStore((s) => s.addBeam);
   const score = useTaskStore((s) => s.score);
   const objectives = useTaskStore((s) => s.objectives);
+  const scenarioName = useScenarioStore((s) => s.scenarioName);
+  const recording = useRunRecorderStore((s) => s.recording);
+  const samples = useRunRecorderStore((s) => s.samples);
+  const setRecording = useRunRecorderStore((s) => s.setRecording);
+
+  const exportRun = () => {
+    const bundle = buildRunExport({
+      scenarioName: scenarioName || 'untitled',
+      seed,
+      fidelity,
+      timeStep,
+      agentCount: agents.length,
+      trajectory: samples,
+      engagements,
+      snapshots,
+    });
+    downloadRunExport(bundle);
+  };
 
   const fleet = useMemo(() => fleetSummary(agents), [agents]);
   const telemetry = selected ? computeTelemetry(selected, simTime) : null;
@@ -112,6 +135,30 @@ export function AnalysisHub() {
             {score} · {objectives.filter((o) => o.completed).length}/
             {objectives.length} objs
           </span>
+        </div>
+
+        <div className="ops-section-title">Research run</div>
+        <div className="ops-stat-row">
+          <span className="k">Record</span>
+          <span className="v">
+            {recording ? `ON · ${samples.length} samples` : 'OFF'}
+          </span>
+        </div>
+        <div className="ops-btn-group" style={{ marginTop: 6, marginBottom: 8 }}>
+          <button
+            type="button"
+            className={`ops-btn ${recording ? 'active' : ''}`}
+            onClick={() => setRecording(!recording)}
+          >
+            {recording ? 'Stop record' : 'Record'}
+          </button>
+          <button type="button" className="ops-btn" onClick={exportRun}>
+            Export run
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--ops-muted)', marginBottom: 8 }}>
+          Export JSON includes seed, fidelity, timeStep, trajectory (if
+          recorded), and engagement/snapshot events.
         </div>
 
         <div className="ops-section-title">Selected asset</div>

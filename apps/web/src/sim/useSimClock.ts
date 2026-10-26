@@ -14,6 +14,7 @@ export function useSimClock() {
     paused,
     timeScale,
     seed,
+    timeStep,
     setSimTime,
     setClockInstance,
   } = useSimClockStore();
@@ -21,7 +22,12 @@ export function useSimClock() {
   // Initialize clock and store reference
   useEffect(() => {
     if (!clockRef.current) {
-      clockRef.current = new SimClock({ seed, timeScale, paused });
+      clockRef.current = new SimClock({
+        seed,
+        timeScale,
+        paused,
+        stepDelta: timeStep,
+      });
       setClockInstance(clockRef.current);
     }
     return () => {
@@ -42,8 +48,11 @@ export function useSimClock() {
       if (clockRef.current.getSeed() !== seed) {
         clockRef.current.setSeed(seed);
       }
+      if (clockRef.current.getTimeStep() !== timeStep) {
+        clockRef.current.setTimeStep(timeStep);
+      }
     }
-  }, [paused, timeScale, seed]);
+  }, [paused, timeScale, seed, timeStep]);
 
   // Update clock in render loop
   useFrame((_state, delta) => {

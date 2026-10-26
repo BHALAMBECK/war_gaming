@@ -1,11 +1,23 @@
 import { setSeed } from '@/util/seed';
+import { accumulateFixedSteps, DEFAULT_MAX_STEPS_PER_FRAME } from './fixedStep';
 
 export interface SimClockState {
   paused: boolean;
   timeScale: number;
   simTime: number; // seconds
   seed: string;
-  stepDelta: number; // seconds per step
+  /** Fixed physics time step in seconds (also used for single-step). */
+  stepDelta: number;
+  /** Leftover frame time not yet consumed by a fixed step. */
+  accumulator: number;
+}
+
+const MIN_TIME_STEP = 0.1;
+const MAX_TIME_STEP = 60;
+
+export function clampTimeStep(dt: number): number {
+  if (!Number.isFinite(dt) || dt <= 0) return 1.0;
+  return Math.max(MIN_TIME_STEP, Math.min(MAX_TIME_STEP, dt));
 }
 
 export class SimClock {
@@ -18,8 +30,10 @@ export class SimClock {
       simTime: 0,
       seed: 'default',
       stepDelta: 1.0,
+      accumulator: 0,
       ...initialState,
     };
+    this.state.stepDelta = clampTimeStep(this.state.stepDelta);
     
     // Initialize RNG with seed
     setSeed(this.state.seed);
@@ -94,7 +108,22 @@ export class SimClock {
   }
 
   /**
-   * Advance simulation by one step (when paused, for single-step).
+   * Fixed physics time step in seconds.
+   */
+  getTimeStep(): number {
+    return this.state.stepDelta;
+  }
+
+  /**
+   * Set fixed physics time step (clamped to 0.1–60 s).
+   */
+  setTimeStep(dt: number): void {
+    this.state.stepDelta = clampTimeStep(dt);
+    this.state.accumulator = 0;
+  }
+
+  /**
+   * Advance simulation by one fixed step (when paused, for single-step).
    */
   step(): number {
     const delta = this.state.stepDelta;
@@ -103,15 +132,23 @@ export class SimClock {
   }
 
   /**
-   * Update simulation time based on frame delta and time scale.
-   * Returns the actual simulation delta that should be used for physics.
+   * Accumulate frame time and advance sim by whole fixed steps only.
+   * Returns the total simulation delta advanced this frame (`steps * timeStep`).
    */
   update(frameDelta: number): number {
     if (this.state.paused || this.state.timeScale === 0) {
       return 0;
     }
 
-    const simDelta = frameDelta * this.state.timeScale;
+    const result = accumulateFixedSteps(
+      this.state.accumulator,
+      frameDelta,
+      this.state.timeScale,
+      this.state.stepDelta,
+      DEFAULT_MAX_STEPS_PER_FRAME
+    );
+    this.state.accumulator = result.accumulator;
+    const simDelta = result.steps * this.state.stepDelta;
     this.state.simTime += simDelta;
     return simDelta;
   }
@@ -121,6 +158,7 @@ export class SimClock {
    */
   reset(): void {
     this.state.simTime = 0;
+    this.state.accumulator = 0;
     // Reset seed to ensure determinism
     setSeed(this.state.seed);
   }

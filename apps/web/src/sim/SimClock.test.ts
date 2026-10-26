@@ -169,25 +169,50 @@ describe('SimClock', () => {
       expect(delta).toBe(0);
     });
 
-    it('advances time by frameDelta * timeScale when playing', () => {
-      const clock = new SimClock({ paused: false, timeScale: 2.0, simTime: 10 });
+    it('advances only in whole fixed steps when playing', () => {
+      // Default timeStep=1s; 0.016*2 accumulates but does not yet complete a step
+      const clock = new SimClock({
+        paused: false,
+        timeScale: 2.0,
+        simTime: 10,
+        stepDelta: 1.0,
+      });
       const delta = clock.update(0.016);
-      expect(delta).toBe(0.032); // 0.016 * 2.0
-      expect(clock.getTime()).toBe(10.032);
+      expect(delta).toBe(0);
+      expect(clock.getTime()).toBe(10);
+
+      // Accumulate enough wall time * scale to cross one step: need 0.5s wall at 2x
+      const delta2 = clock.update(0.5);
+      expect(delta2).toBe(1.0);
+      expect(clock.getTime()).toBe(11);
     });
 
-    it('advances time correctly with different time scales', () => {
-      const clock = new SimClock({ paused: false, timeScale: 0.5, simTime: 0 });
-      clock.update(0.016);
-      expect(clock.getTime()).toBe(0.008); // 0.016 * 0.5
+    it('advances multiple fixed steps under high timeScale', () => {
+      const clock = new SimClock({
+        paused: false,
+        timeScale: 10,
+        simTime: 0,
+        stepDelta: 1.0,
+      });
+      // 0.25 wall * 10 = 2.5 sim-seconds → 2 steps
+      const delta = clock.update(0.25);
+      expect(delta).toBe(2);
+      expect(clock.getTime()).toBe(2);
+      expect(clock.getState().accumulator).toBeCloseTo(0.5, 10);
     });
 
-    it('handles multiple updates correctly', () => {
-      const clock = new SimClock({ paused: false, timeScale: 1.0, simTime: 0 });
-      clock.update(0.016);
-      clock.update(0.016);
-      clock.update(0.016);
-      expect(clock.getTime()).toBeCloseTo(0.048, 5);
+    it('accumulates leftovers across frames until a step completes', () => {
+      const clock = new SimClock({
+        paused: false,
+        timeScale: 1.0,
+        simTime: 0,
+        stepDelta: 1.0,
+      });
+      clock.update(0.4);
+      clock.update(0.4);
+      expect(clock.getTime()).toBe(0);
+      clock.update(0.3);
+      expect(clock.getTime()).toBe(1);
     });
   });
 
@@ -262,6 +287,7 @@ describe('SimClock', () => {
         simTime: 50,
         seed: 'test',
         stepDelta: 0.5,
+        accumulator: 0,
       });
     });
   });

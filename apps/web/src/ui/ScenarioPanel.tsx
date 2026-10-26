@@ -1,3 +1,4 @@
+// Legacy — ops shell is the only entry (App.tsx → OpsShell)
 import { useState, useRef } from 'react';
 import { useScenarioStore } from './stores/scenarioStore';
 import { validateScenario } from '@/scenario/schema';

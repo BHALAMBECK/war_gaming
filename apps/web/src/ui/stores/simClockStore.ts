@@ -1,16 +1,19 @@
 import { create } from 'zustand';
-import { SimClock } from '@/sim/SimClock';
+import { SimClock, clampTimeStep } from '@/sim/SimClock';
 
 interface SimClockState {
   paused: boolean;
   timeScale: number;
   simTime: number; // seconds
   seed: string;
+  /** Fixed physics time step in seconds */
+  timeStep: number;
   clockInstance: SimClock | null;
   setPaused: (paused: boolean) => void;
   setTimeScale: (scale: number) => void;
   setSimTime: (time: number) => void;
   setSeed: (seed: string) => void;
+  setTimeStep: (dt: number) => void;
   setClockInstance: (clock: SimClock | null) => void;
   toggle: () => void;
   step: () => void;
@@ -23,6 +26,7 @@ export const useSimClockStore = create<SimClockState>((set, get) => ({
   timeScale: 1.0,
   simTime: 0,
   seed: 'default',
+  timeStep: 1.0,
   clockInstance: null,
   setPaused: (paused) => {
     set({ paused });
@@ -48,7 +52,20 @@ export const useSimClockStore = create<SimClockState>((set, get) => ({
       set({ simTime: 0 }); // Update store time after reset
     }
   },
-  setClockInstance: (clockInstance) => set({ clockInstance }),
+  setTimeStep: (dt) => {
+    const timeStep = clampTimeStep(dt);
+    set({ timeStep });
+    const clock = get().clockInstance;
+    if (clock) {
+      clock.setTimeStep(timeStep);
+    }
+  },
+  setClockInstance: (clockInstance) => {
+    if (clockInstance) {
+      clockInstance.setTimeStep(get().timeStep);
+    }
+    set({ clockInstance });
+  },
   toggle: () => {
     const clock = get().clockInstance;
     if (clock) {
