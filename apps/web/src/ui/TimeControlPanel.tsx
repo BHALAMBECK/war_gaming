@@ -7,9 +7,11 @@ export function TimeControlPanel() {
     paused,
     timeScale,
     seed,
+    timeStep,
     toggle,
     setTimeScale,
     setSeed,
+    setTimeStep,
     step,
     reset,
     formatTime,
@@ -116,7 +118,7 @@ export function TimeControlPanel() {
         {/* Single step button (only when paused) */}
         {paused && (
           <button onClick={step} className="time-control-button" style={buttonStyle}>
-            Step (+1s)
+            {`Step (+${timeStep}s)`}
           </button>
         )}
 
@@ -124,6 +126,21 @@ export function TimeControlPanel() {
         <div style={timeDisplayStyle}>
           <div style={timeLabelStyle}>Sim Time:</div>
           <div style={timeValueStyle}>{formatTime()}</div>
+        </div>
+
+        {/* Fixed physics time step */}
+        <div style={controlGroupStyle}>
+          <label style={labelStyle}>Time step (s):</label>
+          <input
+            type="number"
+            min={0.1}
+            max={60}
+            step={0.1}
+            value={timeStep}
+            onChange={(e) => setTimeStep(parseFloat(e.target.value))}
+            className="time-control-input"
+            style={inputStyle}
+          />
         </div>
 
         {/* Seed input */}

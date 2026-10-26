@@ -89,7 +89,7 @@ Status tracking for all project milestones. Each milestone includes acceptance c
 ---
 
 ## Milestone 5: Agent Rendering
-**Status**: ⏳ Pending  
+**Status**: ✅ Complete  
 **Goal**: Render N agents as instanced meshes or points for performance. Optional orbit path line for selected agents.
 
 **Acceptance Checks**:
@@ -103,7 +103,7 @@ Status tracking for all project milestones. Each milestone includes acceptance c
 ---
 
 ## Milestone 6: Scenario System v1
-**Status**: ⏳ Pending  
+**Status**: ✅ Complete  
 **Goal**: JSON scenario: Earth params, agent initial conditions, behaviors toggles. Save/load locally.
 
 **Acceptance Checks**:
@@ -117,7 +117,7 @@ Status tracking for all project milestones. Each milestone includes acceptance c
 ---
 
 ## Milestone 7: Swarm Behavior v1 (Abstract)
-**Status**: ⏳ Pending  
+**Status**: ✅ Complete  
 **Goal**: Cohesion, separation, alignment in orbital local frame (abstract). "Formation" mode: ring, plane, lattice.
 
 **Acceptance Checks**:
@@ -131,7 +131,7 @@ Status tracking for all project milestones. Each milestone includes acceptance c
 ---
 
 ## Milestone 8: Collision Avoidance + Safety Bubble
-**Status**: ⏳ Pending  
+**Status**: ⏳ Partial — basic `enforceMinimumSeparation` only; no dedicated `sim/collision/` predictive module  
 **Goal**: Simple predictive avoidance in local frame.
 
 **Acceptance Checks**:
@@ -144,7 +144,7 @@ Status tracking for all project milestones. Each milestone includes acceptance c
 ---
 
 ## Milestone 9: Task Allocation Mini-Game
-**Status**: ⏳ Pending  
+**Status**: ✅ Complete  
 **Goal**: Abstract objectives: "inspect points", "relay nodes", "hold formation zones". Score and timer.
 
 **Acceptance Checks**:
@@ -158,7 +158,7 @@ Status tracking for all project milestones. Each milestone includes acceptance c
 ---
 
 ## Milestone 10: Demo Polish
-**Status**: ⏳ Pending  
+**Status**: ✅ Complete (ops Demo + examples; research export/fixed-step added 2026-10)  
 **Goal**: Prebuilt demo scenarios and "one button demo" sequence.
 
 **Acceptance Checks**:

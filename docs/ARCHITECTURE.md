@@ -117,9 +117,10 @@ Visual Update (mesh positions, camera)
 ## Determinism
 
 - All RNG uses seed-based generator (`seedrandom`)
-- Sim step is deterministic: same initial state + time + seed = same final state
-- Scenario reload produces identical simulation run
-- Golden tests verify determinism
+- Sim advances with a **fixed time step** (`sim/fixedStep.ts` accumulator in `SimClock`); physics uses whole `dt` steps only
+- Scenario JSON is the experiment config: `seed`, `sim.timeStep`, `sim.fidelity`
+- Same initial state + seed + fidelity + timeStep → same trajectory (golden tests cover a short Kepler run)
+- Run export (`util/runExport.ts`) archives meta, trajectory samples, and engagement/snapshot events
 
 ## File Organization
 

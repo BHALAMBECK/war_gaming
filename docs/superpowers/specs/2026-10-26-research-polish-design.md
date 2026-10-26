@@ -1,7 +1,7 @@
 # Research-First Polish Design
 
 **Date:** 2026-10-26  
-**Status:** Approved (design dialogue); pending written-spec review  
+**Status:** Approved; implementing  
 **Approach:** In-browser research harness + targeted product polish (Approach 1)
 
 ## Goal

@@ -1,3 +1,4 @@
+// Legacy — ops shell is the only entry (App.tsx → OpsShell)
 /**
  * DemoButton component: prominent button to start demo mode.
  */

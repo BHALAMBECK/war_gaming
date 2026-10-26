@@ -8,6 +8,14 @@ import {
   listLocalStorageScenarios,
   deleteFromLocalStorage,
 } from '@/scenario/storage';
+import {
+  EXAMPLE_SCENARIO_LABELS,
+  getExampleScenarioNames,
+  loadExampleScenario,
+  type ExampleScenarioName,
+} from '@/scenario/examples';
+import { FIDELITY_LABELS } from '@/sim/orbit/fidelity';
+import type { FidelityLevel } from '@/sim/orbit/fidelity';
 
 interface ScenarioSectionProps {
   isExpanded: boolean;
@@ -18,7 +26,32 @@ export function ScenarioSection({ isExpanded }: ScenarioSectionProps) {
   const [savedScenarios, setSavedScenarios] = useState<string[]>(listLocalStorageScenarios());
   const [saveName, setSaveName] = useState('');
   const [saveDescription, setSaveDescription] = useState('');
+  const [statusLine, setStatusLine] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const reportLoaded = (scenario: {
+    name: string;
+    seed: string;
+    sim: { fidelity?: number; timeStep: number };
+    agents: unknown[];
+  }) => {
+    const fidelity = (scenario.sim.fidelity ?? 0) as FidelityLevel;
+    setStatusLine(
+      `Loaded ${scenario.name} · seed ${scenario.seed} · ${FIDELITY_LABELS[fidelity]} · dt ${scenario.sim.timeStep}s · ${scenario.agents.length} agents`
+    );
+  };
+
+  const handleLoadExample = (name: ExampleScenarioName) => {
+    try {
+      const scenario = loadExampleScenario(name);
+      loadScenario(scenario);
+      reportLoaded(scenario);
+    } catch (error) {
+      alert(
+        `Failed to load example: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  };
 
   const refreshSavedScenarios = () => {
     setSavedScenarios(listLocalStorageScenarios());
@@ -39,6 +72,7 @@ export function ScenarioSection({ isExpanded }: ScenarioSectionProps) {
         const data = JSON.parse(text);
         const scenario = validateScenario(data);
         loadScenario(scenario);
+        reportLoaded(scenario);
         refreshSavedScenarios();
       } catch (error) {
         alert(`Failed to load scenario: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -87,6 +121,7 @@ export function ScenarioSection({ isExpanded }: ScenarioSectionProps) {
       const scenario = loadFromLocalStorage(name);
       if (scenario) {
         loadScenario(scenario);
+        reportLoaded(scenario);
       }
     } catch (error) {
       alert(`Failed to load scenario: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -142,9 +177,30 @@ export function ScenarioSection({ isExpanded }: ScenarioSectionProps) {
           </div>
         )}
 
+        {statusLine && (
+          <div style={{ ...currentScenarioStyle, fontSize: 11, lineHeight: 1.4 }}>
+            {statusLine}
+          </div>
+        )}
+
+        <div style={controlGroupStyle}>
+          <label style={labelStyle}>Built-in examples:</label>
+          {getExampleScenarioNames().map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => handleLoadExample(name)}
+              className="scenario-section-button"
+              style={buttonStyle}
+            >
+              {EXAMPLE_SCENARIO_LABELS[name]}
+            </button>
+          ))}
+        </div>
+
         {/* Load from file */}
         <button onClick={handleLoadFromFile} className="scenario-section-button" style={buttonStyle}>
-          📁 Load from File
+          Load from File
         </button>
         <input
           ref={fileInputRef}

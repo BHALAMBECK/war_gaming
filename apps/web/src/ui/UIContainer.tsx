@@ -1,3 +1,4 @@
+// Legacy — ops shell is the only entry (App.tsx → OpsShell)
 import { CameraPanel } from './CameraPanel';
 import { HideUIButton } from './HideUIButton';
 import { TimeControlPanel } from './TimeControlPanel';

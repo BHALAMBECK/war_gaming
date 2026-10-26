@@ -62,15 +62,23 @@ export interface EarthParams {
 }
 
 /**
+ * Propagation fidelity tier (matches ops slider / orbit propagator).
+ * 0 = Kepler, 1 = Kepler+J2, 2 = RK4+J2
+ */
+export type ScenarioFidelity = 0 | 1 | 2;
+
+/**
  * Simulation parameters in a scenario.
  */
 export interface SimParams {
-  /** Time step in seconds */
+  /** Fixed physics time step in seconds */
   timeStep: number;
-  /** Maximum simulation time in seconds (optional) */
+  /** Maximum simulation time in seconds (metadata / export bound; optional) */
   maxTime?: number;
   /** Initial simulation time in seconds (defaults to 0) */
   initialTime?: number;
+  /** Propagator fidelity (defaults to 0 if omitted) */
+  fidelity?: ScenarioFidelity;
 }
 
 /**

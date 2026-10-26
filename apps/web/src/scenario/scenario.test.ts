@@ -63,6 +63,30 @@ describe('scenario', () => {
       expect(validated.agents).toHaveLength(1);
     });
 
+    it('accepts optional fidelity and defaults absence to undefined', () => {
+      const withFidelity = validateScenario({
+        name: 'F',
+        description: '',
+        version: '1.0.0',
+        earth: { radius: EARTH_RADIUS },
+        agents: [],
+        sim: { timeStep: 1.0, fidelity: 2 },
+        seed: 's',
+      });
+      expect(withFidelity.sim.fidelity).toBe(2);
+
+      const without = validateScenario({
+        name: 'F0',
+        description: '',
+        version: '1.0.0',
+        earth: { radius: EARTH_RADIUS },
+        agents: [],
+        sim: { timeStep: 1.0 },
+        seed: 's',
+      });
+      expect(without.sim.fidelity).toBeUndefined();
+    });
+
     it('rejects scenario with invalid orbital elements', () => {
       const invalidScenario = {
         name: 'Invalid',

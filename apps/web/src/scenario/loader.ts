@@ -9,8 +9,10 @@ import { elementsToCartesian } from '@/sim/orbit/conversions';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
+import { useOpsStore } from '@/ui/stores/opsStore';
 import { setSeed } from '@/util/seed';
 import { createDefaultSystems } from '@/sim/systems/types';
+import type { FidelityLevel } from '@/sim/orbit/fidelity';
 
 /**
  * Convert scenario agent definition to Agent format.
@@ -61,8 +63,14 @@ export function loadScenario(scenario: Scenario): void {
   setSeed(scenario.seed);
   
   // Update sim clock store
-  useSimClockStore.getState().setSeed(scenario.seed);
-  useSimClockStore.getState().setSimTime(scenario.sim.initialTime ?? 0);
+  const clock = useSimClockStore.getState();
+  clock.setSeed(scenario.seed);
+  clock.setSimTime(scenario.sim.initialTime ?? 0);
+  clock.setTimeStep(scenario.sim.timeStep);
+
+  // Apply propagator fidelity from experiment config (default 0)
+  const fidelity = (scenario.sim.fidelity ?? 0) as FidelityLevel;
+  useOpsStore.getState().setFidelity(fidelity);
   
   // Convert scenario agents to Agent format
   const agents = scenarioToAgents(scenario);
