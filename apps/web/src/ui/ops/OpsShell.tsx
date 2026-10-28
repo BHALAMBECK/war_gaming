@@ -1,15 +1,25 @@
 import './opsTheme.css';
 import { EntityPanel } from './EntityPanel';
 import { AnalysisHub } from './AnalysisHub';
-import { useOpsStore, FIDELITY_LABELS, FidelityLevel } from '@/ui/stores/opsStore';
+import {
+  useOpsStore,
+  FIDELITY_LABELS,
+  FidelityLevel,
+  PANEL_LIMITS,
+} from '@/ui/stores/opsStore';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { TimeControlPanel } from '@/ui/TimeControlPanel';
 import { ManeuverPanel } from '@/ui/ManeuverPanel';
 import { TaskPanel } from '@/ui/TaskPanel';
 import { CameraPanel } from '@/ui/CameraPanel';
 import { ScenarioSection } from '@/ui/ScenarioSection';
+import { ScenarioDesigner } from './ScenarioDesigner';
+import { ConstellationDesigner } from './ConstellationDesigner';
 import { startDemo } from '@/ui/demo/demoMode';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { usePanelResize } from './usePanelResize';
+
+type ToolsTab = 'load' | 'scenario' | 'constellation' | 'legacy';
 
 interface OpsShellProps {
   hidden: boolean;
@@ -38,11 +48,46 @@ export function OpsShell({
   const rightPanelOpen = useOpsStore((s) => s.rightPanelOpen);
   const setLeftPanelOpen = useOpsStore((s) => s.setLeftPanelOpen);
   const setRightPanelOpen = useOpsStore((s) => s.setRightPanelOpen);
+  const leftPanelWidth = useOpsStore((s) => s.leftPanelWidth);
+  const rightPanelWidth = useOpsStore((s) => s.rightPanelWidth);
+  const bottomBarHeight = useOpsStore((s) => s.bottomBarHeight);
+  const setLeftPanelWidth = useOpsStore((s) => s.setLeftPanelWidth);
+  const setRightPanelWidth = useOpsStore((s) => s.setRightPanelWidth);
+  const setBottomBarHeight = useOpsStore((s) => s.setBottomBarHeight);
   const formatTime = useSimClockStore((s) => s.formatTime);
   const paused = useSimClockStore((s) => s.paused);
   const toggle = useSimClockStore((s) => s.toggle);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [toolsTab, setToolsTab] = useState<ToolsTab>('scenario');
   const demoCleanupRef = useRef<(() => void) | null>(null);
+
+  const getLeft = useCallback(
+    () => useOpsStore.getState().leftPanelWidth,
+    []
+  );
+  const getRight = useCallback(
+    () => useOpsStore.getState().rightPanelWidth,
+    []
+  );
+  const getBottom = useCallback(
+    () => useOpsStore.getState().bottomBarHeight,
+    []
+  );
+
+  const leftResize = usePanelResize('x', setLeftPanelWidth, getLeft, {
+    min: PANEL_LIMITS.left.min,
+    max: PANEL_LIMITS.left.max,
+  });
+  const rightResize = usePanelResize('x', setRightPanelWidth, getRight, {
+    min: PANEL_LIMITS.right.min,
+    max: PANEL_LIMITS.right.max,
+    sign: -1,
+  });
+  const bottomResize = usePanelResize('y', setBottomBarHeight, getBottom, {
+    min: PANEL_LIMITS.bottom.min,
+    max: PANEL_LIMITS.bottom.max,
+    sign: -1,
+  });
 
   const handleDemo = () => {
     demoCleanupRef.current?.();
@@ -54,7 +99,11 @@ export function OpsShell({
 
   if (hidden) {
     return (
-      <div className="ops-shell" style={{ gridTemplateRows: 'auto' }}>
+      <div
+        className="ops-shell"
+        style={{ gridTemplateRows: `1fr ${bottomBarHeight}px` }}
+      >
+        <div />
         <div className="ops-topbar" style={{ justifyContent: 'flex-end' }}>
           <button
             type="button"
@@ -68,18 +117,123 @@ export function OpsShell({
     );
   }
 
-  const bodyClass =
-    !leftPanelOpen && !rightPanelOpen
-      ? 'ops-body both-collapsed'
-      : !leftPanelOpen
-        ? 'ops-body left-collapsed'
-        : !rightPanelOpen
-          ? 'ops-body right-collapsed'
-          : 'ops-body';
+  const leftW = leftPanelOpen ? leftPanelWidth : 0;
+  const rightW = rightPanelOpen ? rightPanelWidth : 0;
+  const fidelityNote = `${FIDELITY_NOTES[fidelity]} · sandbox, not ops-grade ephemeris`;
+  const compactBottom = bottomBarHeight < 58;
 
   return (
-    <div className="ops-shell">
-      <header className="ops-topbar">
+    <div
+      className="ops-shell"
+      style={{ gridTemplateRows: `1fr ${bottomBarHeight}px` }}
+    >
+      <div
+        className="ops-body"
+        style={{
+          gridTemplateColumns: `${leftW}px 1fr ${rightW}px`,
+        }}
+      >
+        <aside
+          className="ops-panel"
+          style={{ visibility: leftPanelOpen ? 'visible' : 'hidden' }}
+        >
+          <EntityPanel />
+          {leftPanelOpen && (
+            <div
+              className="ops-resize-handle ops-resize-handle-x"
+              onPointerDown={leftResize.onPointerDown}
+              title="Drag to resize"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize tracks panel"
+            />
+          )}
+        </aside>
+
+        <div className="ops-center">
+          {toolsOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                width: 340,
+                maxHeight: 'calc(100% - 16px)',
+                overflow: 'auto',
+                zIndex: 6,
+                pointerEvents: 'auto',
+                background: 'var(--ops-panel)',
+                border: '1px solid var(--ops-border)',
+                padding: 8,
+              }}
+            >
+              <div className="ops-section-title" style={{ marginTop: 0 }}>
+                Design tools
+              </div>
+              <div
+                className="ops-btn-group"
+                style={{ marginBottom: 10, flexWrap: 'wrap' }}
+              >
+                {(
+                  [
+                    ['scenario', 'Scenario'],
+                    ['constellation', 'Constellation'],
+                    ['load', 'Load/Save'],
+                    ['legacy', 'Legacy'],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`ops-btn ${toolsTab === id ? 'active' : ''}`}
+                    onClick={() => setToolsTab(id)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {toolsTab === 'scenario' && <ScenarioDesigner />}
+              {toolsTab === 'constellation' && <ConstellationDesigner />}
+              {toolsTab === 'load' && <ScenarioSection isExpanded />}
+              {toolsTab === 'legacy' && (
+                <div style={{ position: 'relative' }}>
+                  <LegacyPanelHost />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <aside
+          className="ops-panel right"
+          style={{ visibility: rightPanelOpen ? 'visible' : 'hidden' }}
+        >
+          {rightPanelOpen && (
+            <div
+              className="ops-resize-handle ops-resize-handle-x left"
+              onPointerDown={rightResize.onPointerDown}
+              title="Drag to resize"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize mission ops panel"
+            />
+          )}
+          <AnalysisHub />
+        </aside>
+      </div>
+
+      <header
+        className={`ops-topbar${compactBottom ? ' compact' : ''}`}
+        style={{ height: bottomBarHeight }}
+      >
+        <div
+          className="ops-resize-handle ops-resize-handle-y"
+          onPointerDown={bottomResize.onPointerDown}
+          title="Drag to resize"
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label="Resize bottom bar"
+        />
         <div className="ops-brand">
           OSWV <span>Lattice Ops</span>
         </div>
@@ -105,7 +259,7 @@ export function OpsShell({
           {paused ? 'Play' : 'Pause'}
         </button>
 
-        <div style={{ minWidth: 200, maxWidth: 280 }}>
+        <div className="ops-fidelity">
           <label className="ops-label" htmlFor="fidelity-slider">
             Fidelity: {FIDELITY_LABELS[fidelity]}
           </label>
@@ -121,16 +275,11 @@ export function OpsShell({
               setFidelity(Number(e.target.value) as FidelityLevel)
             }
           />
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--ops-muted)',
-              marginTop: 2,
-              lineHeight: 1.3,
-            }}
-          >
-            {FIDELITY_NOTES[fidelity]} · sandbox, not ops-grade ephemeris
-          </div>
+          {!compactBottom && (
+            <div className="ops-fidelity-note" title={fidelityNote}>
+              {FIDELITY_NOTES[fidelity]}
+            </div>
+          )}
         </div>
 
         <div className="ops-btn-group">
@@ -178,50 +327,6 @@ export function OpsShell({
 
         <div className="ops-time-chip">{formatTime()}</div>
       </header>
-
-      <div className={bodyClass}>
-        <aside
-          className="ops-panel"
-          style={{ visibility: leftPanelOpen ? 'visible' : 'hidden' }}
-        >
-          <EntityPanel />
-        </aside>
-
-        <div className="ops-center">
-          {toolsOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 12,
-                right: 12,
-                width: 280,
-                maxHeight: 'calc(100% - 24px)',
-                overflow: 'auto',
-                zIndex: 6,
-                pointerEvents: 'auto',
-                background: 'var(--ops-panel)',
-                border: '1px solid var(--ops-border)',
-                padding: 8,
-              }}
-            >
-              <div className="ops-section-title" style={{ marginTop: 0 }}>
-                Legacy tools
-              </div>
-              <div style={{ position: 'relative' }}>
-                {/* Reuse existing panels without absolute offsets */}
-                <LegacyPanelHost />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <aside
-          className="ops-panel right"
-          style={{ visibility: rightPanelOpen ? 'visible' : 'hidden' }}
-        >
-          <AnalysisHub />
-        </aside>
-      </div>
     </div>
   );
 }
@@ -240,7 +345,7 @@ function LegacyPanelHost() {
           right: auto !important;
           left: auto !important;
           bottom: auto !important;
-          margin-bottom: 10px !important;
+          margin-bottom: 8px !important;
           max-width: 100% !important;
           width: 100% !important;
         }
@@ -249,7 +354,7 @@ function LegacyPanelHost() {
       <TimeControlPanel />
       <ManeuverPanel />
       <TaskPanel />
-      <div style={{ padding: 8 }}>
+      <div style={{ padding: 6 }}>
         <ScenarioSection isExpanded />
       </div>
     </div>

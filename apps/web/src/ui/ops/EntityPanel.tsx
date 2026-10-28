@@ -33,7 +33,7 @@ export function EntityPanel() {
         </span>
       </div>
       <div className="ops-panel-body">
-        <div className="ops-btn-group" style={{ marginBottom: 8 }}>
+        <div className="ops-btn-group" style={{ marginBottom: 4 }}>
           {(['all', 'friendly', 'enemy'] as TeamFilter[]).map((f) => (
             <button
               key={f}
@@ -49,12 +49,12 @@ export function EntityPanel() {
           className="ops-mono"
           style={{
             width: '100%',
-            marginBottom: 8,
-            padding: '6px 8px',
+            marginBottom: 4,
+            padding: '4px 6px',
             background: 'var(--ops-panel-2)',
             border: '1px solid var(--ops-border)',
             color: 'var(--ops-text)',
-            fontSize: 12,
+            fontSize: 11,
           }}
           placeholder="Filter by id…"
           value={query}

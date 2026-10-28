@@ -69,7 +69,7 @@ function SolarScene() {
         minDistance={1}
         maxDistance={80}
       />
-      <Starfield />
+      <Starfield radius={500} />
       <SolarSystem />
     </>
   );

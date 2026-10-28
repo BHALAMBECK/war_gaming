@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { InstancedMesh, Object3D, Color } from 'three';
+import { BoxGeometry, InstancedMesh, Object3D, Color } from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
@@ -14,6 +15,23 @@ import type { Objective } from '@/sim/tasks/types';
 
 const tempObject = new Object3D();
 const tempColor = new Color();
+
+/** Procedural bus + dual solar panels (Earth-scene scale). */
+function createSatelliteGeometry() {
+  const body = new BoxGeometry(0.014, 0.011, 0.018);
+  const panelL = new BoxGeometry(0.032, 0.0025, 0.012);
+  panelL.translate(-0.025, 0, 0);
+  const panelR = new BoxGeometry(0.032, 0.0025, 0.012);
+  panelR.translate(0.025, 0, 0);
+  const merged = mergeGeometries([body, panelL, panelR], false);
+  body.dispose();
+  panelL.dispose();
+  panelR.dispose();
+  if (!merged) {
+    throw new Error('Failed to merge satellite geometry');
+  }
+  return merged;
+}
 
 /**
  * Agents component using InstancedMesh for high-performance rendering.
@@ -236,15 +254,22 @@ export function Agents() {
     }
   }, [agents.length]);
 
+  const satGeometry = useMemo(() => createSatelliteGeometry(), []);
+
+  useEffect(() => {
+    return () => {
+      satGeometry.dispose();
+    };
+  }, [satGeometry]);
+
   if (agents.length === 0) return null;
 
   return (
     <instancedMesh
       ref={instancedMeshRef}
-      args={[undefined, undefined, agents.length]}
+      args={[satGeometry, undefined, agents.length]}
     >
-      <boxGeometry args={[0.02, 0.02, 0.02]} />
-      <meshStandardMaterial vertexColors={true} emissiveIntensity={0.5} />
+      <meshBasicMaterial toneMapped={false} />
     </instancedMesh>
   );
 }
