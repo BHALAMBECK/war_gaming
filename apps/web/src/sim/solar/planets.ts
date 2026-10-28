@@ -59,7 +59,7 @@ export const PLANETS: PlanetDef[] = [
     lanDeg: 0,
     periDeg: 102.9,
     m0Deg: 100.5,
-    displayRadius: 0.02,
+    displayRadius: 0.035,
     color: '#3a7bd5',
   },
   {
@@ -71,7 +71,7 @@ export const PLANETS: PlanetDef[] = [
     lanDeg: 49.6,
     periDeg: 286.5,
     m0Deg: 19.4,
-    displayRadius: 0.014,
+    displayRadius: 0.028,
     color: '#c1440e',
   },
   {

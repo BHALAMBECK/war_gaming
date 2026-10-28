@@ -10,6 +10,7 @@ export function Earth({ radius = 1 }: EarthProps) {
   const meshRef = useRef<Mesh>(null);
   const [dayTexture, setDayTexture] = useState<Texture | null>(null);
   const [nightTexture, setNightTexture] = useState<Texture | null>(null);
+  const [normalTexture, setNormalTexture] = useState<Texture | null>(null);
   const [texturesLoaded, setTexturesLoaded] = useState(false);
   const [textureError, setTextureError] = useState(false);
 
@@ -19,6 +20,7 @@ export function Earth({ radius = 1 }: EarthProps) {
     loader.crossOrigin = 'anonymous';
     let dayTex: Texture | null = null;
     let nightTex: Texture | null = null;
+    let normalTex: Texture | null = null;
     let cancelled = false;
 
     const loadTextures = async () => {
@@ -104,11 +106,37 @@ export function Earth({ radius = 1 }: EarthProps) {
 
         if (cancelled) return;
 
-        console.log('Setting Earth textures - day:', dayTex, 'night:', nightTex);
+        const normalUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/earth_normal_2048.jpg';
+        const normalUrlFallback = 'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/earth_normal_2048.jpg';
+        try {
+          normalTex = await new Promise<Texture | null>((resolve) => {
+            const tryLoad = (url: string, isFallback = false) => {
+              loader.load(
+                url,
+                (texture) => {
+                  texture.wrapS = texture.wrapT = RepeatWrapping;
+                  texture.anisotropy = 16;
+                  resolve(texture);
+                },
+                undefined,
+                () => {
+                  if (!isFallback) tryLoad(normalUrlFallback, true);
+                  else resolve(null);
+                }
+              );
+            };
+            tryLoad(normalUrl);
+          });
+        } catch {
+          normalTex = null;
+        }
+
+        if (cancelled) return;
+
         setDayTexture(dayTex);
         setNightTexture(nightTex);
+        setNormalTexture(normalTex);
         setTexturesLoaded(true);
-        console.log('Earth textures state updated - should trigger re-render');
       } catch (error) {
         if (!cancelled) {
           console.error('Failed to load Earth textures, using fallback colors:', error);
@@ -125,6 +153,7 @@ export function Earth({ radius = 1 }: EarthProps) {
       // Cleanup textures if component unmounts
       if (dayTex) dayTex.dispose();
       if (nightTex) nightTex.dispose();
+      if (normalTex) normalTex.dispose();
     };
   }, []);
 
@@ -150,15 +179,16 @@ export function Earth({ radius = 1 }: EarthProps) {
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[radius, 64, 64]} />
+      <sphereGeometry args={[radius, 128, 128]} />
       <meshStandardMaterial
-        key={`earth-material-${texturesLoaded ? 'loaded' : 'fallback'}-${dayTexture ? 'tex' : 'no-tex'}`} // Force re-render when texture loads
+        key={`earth-material-${texturesLoaded ? 'loaded' : 'fallback'}-${dayTexture ? 'tex' : 'no-tex'}`}
         map={dayTexture}
+        normalMap={normalTexture}
         emissiveMap={nightTexture}
-        color={useFallback ? 0x4a90e2 : 0xffffff} // White color multiplies with texture (no tinting)
-        emissive={useFallback ? 0x1a3a5a : 0x222222} // Subtle glow for night lights
+        color={useFallback ? 0x4a90e2 : 0xffffff}
+        emissive={useFallback ? 0x1a3a5a : 0x222222}
         emissiveIntensity={useFallback ? 0.3 : 0.6}
-        roughness={0.9}
+        roughness={0.85}
         metalness={0.05}
         envMapIntensity={1.0}
       />

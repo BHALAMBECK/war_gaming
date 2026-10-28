@@ -384,3 +384,127 @@
     display: none;
   }
 }
+
+/* Library / Studio staging screens */
+.ops-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at top left, rgba(225, 6, 0, 0.14), transparent 45%),
+    linear-gradient(180deg, #120808 0%, #080808 55%, #050505 100%);
+  color: var(--ops-text);
+  font-family: var(--ops-font);
+  pointer-events: auto;
+  overflow: auto;
+}
+
+.ops-stage-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 2px solid var(--ops-accent);
+  background: linear-gradient(180deg, #1a0505 0%, #0a0a0a 100%);
+}
+
+.ops-stage-header.studio {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.ops-stage-subtitle {
+  font-size: 12px;
+  color: var(--ops-warn);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ops-stage-main {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.ops-stage-lead {
+  font-size: 13px;
+  color: var(--ops-muted);
+  line-height: 1.45;
+  margin: 0 0 16px;
+}
+
+.ops-project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.ops-project-card {
+  appearance: none;
+  text-align: left;
+  padding: 12px;
+  background: var(--ops-panel-2);
+  border: 1px solid var(--ops-border);
+  color: var(--ops-text);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--ops-font);
+}
+
+.ops-project-card:hover {
+  border-color: var(--ops-accent);
+  background: rgba(225, 6, 0, 0.1);
+}
+
+.ops-project-card strong {
+  font-size: 13px;
+}
+
+.ops-project-card .ops-mono {
+  font-size: 10px;
+  color: var(--ops-muted);
+}
+
+.ops-project-card.row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+.ops-studio-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+.ops-studio-nav {
+  padding: 12px;
+  border-right: 1px solid var(--ops-border);
+  background: rgba(10, 10, 10, 0.75);
+}
+
+.ops-studio-main {
+  padding: 16px 20px 40px;
+  overflow: auto;
+  max-width: 720px;
+}
+
+@media (max-width: 720px) {
+  .ops-studio-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ops-studio-nav {
+    border-right: none;
+    border-bottom: 1px solid var(--ops-border);
+  }
+}

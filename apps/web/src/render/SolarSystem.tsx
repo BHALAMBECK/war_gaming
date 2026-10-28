@@ -1,27 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import {
   BufferGeometry,
   DoubleSide,
   Float32BufferAttribute,
   Mesh,
-  Texture,
-  TextureLoader,
-  RepeatWrapping,
+  Vector3,
 } from 'three';
-import { useSimClockStore } from '@/ui/stores/simClockStore';
-import { PLANETS, planetPositionAu, sampleOrbitAu } from '@/sim/solar/planets';
 
-const EARTH_TEXTURE_URL =
-  'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/earth_atmos_2048.jpg';
-const EARTH_TEXTURE_FALLBACK =
-  'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/earth_atmos_2048.jpg';
+export type SolarControlsHandle = {
+  target: Vector3;
+  minDistance: number;
+  maxDistance: number;
+  update: () => void;
+};
+import { useSimClockStore } from '@/ui/stores/simClockStore';
+import { useOpsStore } from '@/ui/stores/opsStore';
+import { PLANETS, planetPositionAu, sampleOrbitAu } from '@/sim/solar/planets';
+import {
+  disposeBodyTextures,
+  loadBodyTextures,
+  type BodyTextureSet,
+} from './textures/planetTextures';
 
 function OrbitRing({ planetId }: { planetId: string }) {
   const planet = PLANETS.find((p) => p.id === planetId)!;
   const geometry = useMemo(() => {
     const geo = new BufferGeometry();
-    const pts = sampleOrbitAu(planet, 160);
+    const pts = sampleOrbitAu(planet, 256);
     geo.setAttribute('position', new Float32BufferAttribute(pts, 3));
     return geo;
   }, [planet]);
@@ -38,7 +44,7 @@ function SaturnRings({ radius }: { radius: number }) {
   const outer = radius * 2.35;
   return (
     <mesh rotation={[Math.PI / 2.35, 0.15, 0]}>
-      <ringGeometry args={[inner, outer, 64]} />
+      <ringGeometry args={[inner, outer, 96]} />
       <meshBasicMaterial
         color="#d4c4a0"
         transparent
@@ -52,34 +58,154 @@ function SaturnRings({ radius }: { radius: number }) {
 function PlanetBody({
   planetId,
   simTime,
-  earthTexture,
+  textures,
+  focused,
 }: {
   planetId: string;
   simTime: number;
-  earthTexture: Texture | null;
+  textures: BodyTextureSet;
+  focused: boolean;
 }) {
   const planet = PLANETS.find((p) => p.id === planetId)!;
+  const setFocusedBodyId = useOpsStore((s) => s.setFocusedBodyId);
   const ref = useRef<Mesh>(null);
   const [x, y, z] = planetPositionAu(planet, simTime);
-  const isEarth = planet.id === 'earth';
-  const useTexture = isEarth && earthTexture !== null;
+  const hasMap = Boolean(textures.map);
+  const segments = focused || planetId === 'earth' || planetId === 'mars' ? 96 : 64;
+  const bumpScale =
+    planetId === 'mars' ? 0.012 : planetId === 'earth' ? 0.008 : 0.006;
+
+  const onClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    setFocusedBodyId(planetId);
+  };
 
   return (
-    <mesh ref={ref} position={[x, y, z]}>
-      <sphereGeometry args={[planet.displayRadius, 64, 64]} />
-      <meshStandardMaterial
-        color={useTexture ? '#ffffff' : planet.color}
-        map={useTexture ? earthTexture : null}
-        emissive={planet.emissive ?? '#000000'}
-        emissiveIntensity={planet.emissive ? 0.4 : 0}
-        roughness={0.55}
-        metalness={0.15}
-      />
+    <group position={[x, y, z]}>
+      <mesh ref={ref} onClick={onClick}>
+        <sphereGeometry args={[planet.displayRadius, segments, segments]} />
+        <meshStandardMaterial
+          color={hasMap ? '#ffffff' : planet.color}
+          map={textures.map ?? null}
+          bumpMap={textures.bump ?? null}
+          bumpScale={textures.bump ? bumpScale * planet.displayRadius * 40 : 0}
+          normalMap={textures.normal ?? null}
+          emissive={planet.emissive ?? '#000000'}
+          emissiveIntensity={planet.emissive ? 0.4 : 0}
+          roughness={0.55}
+          metalness={0.12}
+        />
+      </mesh>
       {planet.id === 'saturn' && (
         <SaturnRings radius={planet.displayRadius} />
       )}
+      {planet.id === 'earth' && (
+        <EarthMoonCompanion earthRadius={planet.displayRadius} />
+      )}
+    </group>
+  );
+}
+
+function EarthMoonCompanion({ earthRadius }: { earthRadius: number }) {
+  const setFocusedBodyId = useOpsStore((s) => s.setFocusedBodyId);
+  const [textures, setTextures] = useState<BodyTextureSet>({});
+  const angle = useRef(0);
+  const meshRef = useRef<Mesh>(null);
+  const moonR = earthRadius * 0.27;
+  const dist = earthRadius * 3.2;
+
+  useEffect(() => {
+    let cancelled = false;
+    let loaded: BodyTextureSet = {};
+    loadBodyTextures('moon').then((set) => {
+      if (cancelled) {
+        disposeBodyTextures(set);
+        return;
+      }
+      loaded = set;
+      setTextures(set);
+    });
+    return () => {
+      cancelled = true;
+      disposeBodyTextures(loaded);
+    };
+  }, []);
+
+  useFrame((_, dt) => {
+    angle.current += dt * 0.15;
+    if (meshRef.current) {
+      meshRef.current.position.set(
+        Math.cos(angle.current) * dist,
+        0,
+        Math.sin(angle.current) * dist
+      );
+      meshRef.current.rotation.y += dt * 0.2;
+    }
+  });
+
+  return (
+    <mesh
+      ref={meshRef}
+      onClick={(e) => {
+        e.stopPropagation();
+        setFocusedBodyId('moon');
+      }}
+    >
+      <sphereGeometry args={[moonR, 96, 96]} />
+      <meshStandardMaterial
+        map={textures.map ?? null}
+        bumpMap={textures.bump ?? textures.map ?? null}
+        bumpScale={0.02}
+        color={textures.map ? '#ffffff' : '#aaaaaa'}
+        roughness={0.92}
+        metalness={0.02}
+      />
     </mesh>
   );
+}
+
+/**
+ * Smoothly follow the focused body with OrbitControls target.
+ */
+export function SolarFocusController({
+  controlsRef,
+}: {
+  controlsRef: MutableRefObject<SolarControlsHandle | null>;
+}) {
+  const focusedBodyId = useOpsStore((s) => s.focusedBodyId);
+  const simTime = useSimClockStore((s) => s.simTime);
+  const desired = useMemo(() => new Vector3(), []);
+
+  useFrame(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    if (!focusedBodyId || focusedBodyId === 'sun') {
+      desired.set(0, 0, 0);
+      controls.minDistance = 0.4;
+      controls.maxDistance = 120;
+    } else if (focusedBodyId === 'moon') {
+      const earth = PLANETS.find((p) => p.id === 'earth')!;
+      const [ex, ey, ez] = planetPositionAu(earth, simTime);
+      const t = performance.now() * 0.00015;
+      const dist = earth.displayRadius * 3.2;
+      desired.set(ex + Math.cos(t) * dist, ey, ez + Math.sin(t) * dist);
+      controls.minDistance = earth.displayRadius * 0.15;
+      controls.maxDistance = 40;
+    } else {
+      const planet = PLANETS.find((p) => p.id === focusedBodyId);
+      if (!planet) return;
+      const [x, y, z] = planetPositionAu(planet, simTime);
+      desired.set(x, y, z);
+      controls.minDistance = Math.max(0.02, planet.displayRadius * 1.8);
+      controls.maxDistance = 120;
+    }
+
+    controls.target.lerp(desired, 0.08);
+    controls.update();
+  });
+
+  return null;
 }
 
 /**
@@ -87,61 +213,68 @@ function PlanetBody({
  */
 export function SolarSystem() {
   const simTime = useSimClockStore((s) => s.simTime);
-  const sunPulse = useRef(0);
-  const [earthTexture, setEarthTexture] = useState<Texture | null>(null);
+  const focusedBodyId = useOpsStore((s) => s.focusedBodyId);
+  const setFocusedBodyId = useOpsStore((s) => s.setFocusedBodyId);
+  const [textureMap, setTextureMap] = useState<
+    Record<string, BodyTextureSet>
+  >({});
 
   useEffect(() => {
-    const loader = new TextureLoader();
-    loader.crossOrigin = 'anonymous';
     let cancelled = false;
-    let loaded: Texture | null = null;
+    const loaded: Record<string, BodyTextureSet> = {};
+    const ids = [
+      'earth',
+      'mars',
+      'moon',
+      'mercury',
+      'venus',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+    ];
 
-    const apply = (texture: Texture) => {
+    Promise.all(
+      ids.map(async (id) => {
+        const set = await loadBodyTextures(id);
+        loaded[id] = set;
+        return [id, set] as const;
+      })
+    ).then((entries) => {
       if (cancelled) {
-        texture.dispose();
+        for (const set of Object.values(loaded)) disposeBodyTextures(set);
         return;
       }
-      texture.wrapS = texture.wrapT = RepeatWrapping;
-      texture.anisotropy = 8;
-      texture.colorSpace = 'srgb';
-      loaded = texture;
-      setEarthTexture(texture);
-    };
-
-    loader.load(
-      EARTH_TEXTURE_URL,
-      apply,
-      undefined,
-      () => {
-        loader.load(EARTH_TEXTURE_FALLBACK, apply, undefined, () => {
-          /* keep flat Earth color */
-        });
-      }
-    );
+      setTextureMap(Object.fromEntries(entries));
+    });
 
     return () => {
       cancelled = true;
-      loaded?.dispose();
+      for (const set of Object.values(loaded)) disposeBodyTextures(set);
     };
   }, []);
 
-  useFrame((_, delta) => {
-    sunPulse.current += delta;
-  });
-
   return (
-    <group>
-      {/* Sun */}
-      <mesh>
-        <sphereGeometry args={[0.08, 48, 48]} />
+    <group
+      onPointerMissed={() => {
+        setFocusedBodyId(null);
+      }}
+    >
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation();
+          setFocusedBodyId('sun');
+        }}
+      >
+        <sphereGeometry args={[0.08, 64, 64]} />
         <meshStandardMaterial
           color="#ffcc66"
           emissive="#ff9900"
           emissiveIntensity={1.6}
         />
       </mesh>
-      <pointLight color="#ffd27a" intensity={2.6} distance={90} decay={1.1} />
-      <ambientLight intensity={0.42} />
+      <pointLight color="#ffd27a" intensity={2.8} distance={100} decay={1.05} />
+      <ambientLight intensity={0.45} />
 
       {PLANETS.map((p) => (
         <group key={p.id}>
@@ -149,7 +282,8 @@ export function SolarSystem() {
           <PlanetBody
             planetId={p.id}
             simTime={simTime}
-            earthTexture={earthTexture}
+            textures={textureMap[p.id] ?? {}}
+            focused={focusedBodyId === p.id}
           />
         </group>
       ))}

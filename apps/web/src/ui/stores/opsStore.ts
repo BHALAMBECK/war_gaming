@@ -5,6 +5,8 @@ import {
 } from '@/sim/orbit/fidelity';
 
 export type ViewMode = 'earth' | 'solar';
+/** Library → Studio (design) → Ops (live three-panel run). */
+export type AppPhase = 'library' | 'studio' | 'ops';
 export type { FidelityLevel };
 export { FIDELITY_LABELS };
 
@@ -76,16 +78,20 @@ function persistLayout(partial: Partial<PersistedLayout>) {
 }
 
 interface OpsState {
+  appPhase: AppPhase;
   viewMode: ViewMode;
   fidelity: FidelityLevel;
+  focusedBodyId: string | null;
   leftPanelOpen: boolean;
   rightPanelOpen: boolean;
   engagementArmed: boolean;
   leftPanelWidth: number;
   rightPanelWidth: number;
   bottomBarHeight: number;
+  setAppPhase: (phase: AppPhase) => void;
   setViewMode: (mode: ViewMode) => void;
   setFidelity: (level: FidelityLevel) => void;
+  setFocusedBodyId: (id: string | null) => void;
   setLeftPanelOpen: (open: boolean) => void;
   setRightPanelOpen: (open: boolean) => void;
   setEngagementArmed: (armed: boolean) => void;
@@ -97,16 +103,20 @@ interface OpsState {
 const initialLayout = loadLayout();
 
 export const useOpsStore = create<OpsState>((set) => ({
+  appPhase: 'library',
   viewMode: 'earth',
   fidelity: 0,
+  focusedBodyId: null,
   leftPanelOpen: true,
   rightPanelOpen: true,
   engagementArmed: false,
   leftPanelWidth: initialLayout.leftPanelWidth,
   rightPanelWidth: initialLayout.rightPanelWidth,
   bottomBarHeight: initialLayout.bottomBarHeight,
+  setAppPhase: (appPhase) => set({ appPhase }),
   setViewMode: (viewMode) => set({ viewMode }),
   setFidelity: (fidelity) => set({ fidelity }),
+  setFocusedBodyId: (focusedBodyId) => set({ focusedBodyId }),
   setLeftPanelOpen: (leftPanelOpen) => set({ leftPanelOpen }),
   setRightPanelOpen: (rightPanelOpen) => set({ rightPanelOpen }),
   setEngagementArmed: (engagementArmed) => set({ engagementArmed }),

@@ -70,7 +70,7 @@ export function ConstellationDesigner() {
       });
       // Avoid id collisions
       const existing = new Set(currentScenario.agents.map((a) => a.id));
-      const renamed = extra.map((a, i) => {
+      const renamed = extra.map((a) => {
         let id = a.id;
         let n = 0;
         while (existing.has(id)) {
