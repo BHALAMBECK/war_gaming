@@ -5,8 +5,8 @@ import {
 } from '@/sim/orbit/fidelity';
 
 export type ViewMode = 'earth' | 'solar';
-/** Library → Studio (design) → Ops (live three-panel run). */
-export type AppPhase = 'library' | 'studio' | 'ops';
+/** Library → Studio (design) → Analysis → Ops (live three-panel run). */
+export type AppPhase = 'library' | 'studio' | 'analysis' | 'ops';
 export type { FidelityLevel };
 export { FIDELITY_LABELS };
 

@@ -59,12 +59,21 @@ const TeamSchema = z.enum(['friendly', 'enemy']);
 /**
  * Zod schema for AgentScenario.
  */
+const AgentBusMetadataSchema = z.object({
+  profile: z.string(),
+  name: z.string(),
+  dryMassKg: z.number().nonnegative(),
+  unitBusCostUsd: z.number().nonnegative(),
+  summary: z.string(),
+});
+
 const AgentScenarioSchema: z.ZodType<AgentScenario> = z.object({
   id: z.string().min(1),
   orbit: OrbitStateSchema,
   behaviors: BehaviorFlagsSchema,
   team: TeamSchema.optional().default('friendly'),
   dvRemaining: z.number().nonnegative().optional(),
+  bus: AgentBusMetadataSchema.optional(),
 });
 
 /**

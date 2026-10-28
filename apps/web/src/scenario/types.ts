@@ -34,6 +34,15 @@ export interface BehaviorFlags {
  */
 export type Team = 'friendly' | 'enemy';
 
+/** Design-time bus metadata attached to scenario agents (optional). */
+export interface AgentBusMetadata {
+  profile: string;
+  name: string;
+  dryMassKg: number;
+  unitBusCostUsd: number;
+  summary: string;
+}
+
 /**
  * Agent definition in a scenario.
  * Supports both orbital elements and Cartesian state for flexibility.
@@ -49,6 +58,8 @@ export interface AgentScenario {
   team?: Team;
   /** Initial delta-v budget in m/s. Defaults to 1000 m/s if not specified. */
   dvRemaining?: number;
+  /** Optional bus configuration from the satellite designer */
+  bus?: AgentBusMetadata;
 }
 
 /**

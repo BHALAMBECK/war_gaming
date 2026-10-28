@@ -508,3 +508,34 @@
     border-bottom: 1px solid var(--ops-border);
   }
 }
+
+.ops-analysis-shell-main {
+  padding: 16px 24px 40px;
+  overflow: auto;
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ops-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ops-analysis-card {
+  border: 1px solid var(--ops-border);
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ops-analysis-feed {
+  max-height: 200px;
+  overflow: auto;
+}
+
+.ops-studio-main:has(.ops-analysis-page) {
+  max-width: 960px;
+}
