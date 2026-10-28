@@ -1,6 +1,6 @@
 import './opsTheme.css';
 import { EntityPanel } from './EntityPanel';
-import { AnalysisHub } from './AnalysisHub';
+import { MissionOpsPanel } from './MissionOpsPanel';
 import {
   useOpsStore,
   FIDELITY_LABELS,
@@ -15,11 +15,12 @@ import { CameraPanel } from '@/ui/CameraPanel';
 import { ScenarioSection } from '@/ui/ScenarioSection';
 import { ScenarioDesigner } from './ScenarioDesigner';
 import { ConstellationDesigner } from './ConstellationDesigner';
+import { SatelliteDesigner } from './SatelliteDesigner';
 import { startDemo } from '@/ui/demo/demoMode';
 import { useCallback, useRef, useState } from 'react';
 import { usePanelResize } from './usePanelResize';
 
-type ToolsTab = 'load' | 'scenario' | 'constellation' | 'legacy';
+type ToolsTab = 'load' | 'scenario' | 'satellite' | 'constellation' | 'legacy';
 
 interface OpsShellProps {
   hidden: boolean;
@@ -178,6 +179,7 @@ export function OpsShell({
                 {(
                   [
                     ['scenario', 'Scenario'],
+                    ['satellite', 'Satellite'],
                     ['constellation', 'Constellation'],
                     ['load', 'Load/Save'],
                     ['legacy', 'Legacy'],
@@ -194,6 +196,7 @@ export function OpsShell({
                 ))}
               </div>
               {toolsTab === 'scenario' && <ScenarioDesigner />}
+              {toolsTab === 'satellite' && <SatelliteDesigner />}
               {toolsTab === 'constellation' && <ConstellationDesigner />}
               {toolsTab === 'load' && <ScenarioSection isExpanded />}
               {toolsTab === 'legacy' && (
@@ -219,7 +222,7 @@ export function OpsShell({
               aria-label="Resize mission ops panel"
             />
           )}
-          <AnalysisHub />
+          <MissionOpsPanel />
         </aside>
       </div>
 
@@ -323,6 +326,13 @@ export function OpsShell({
             onClick={() => onToggleHide(true)}
           >
             Hide
+          </button>
+          <button
+            type="button"
+            className="ops-btn"
+            onClick={() => setAppPhase('analysis')}
+          >
+            Analysis
           </button>
           <button
             type="button"

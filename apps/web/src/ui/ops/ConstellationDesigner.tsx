@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
+import { useDesignStore } from '@/ui/stores/designStore';
 import { downloadScenario } from '@/scenario/saver';
 import { saveToLocalStorage } from '@/scenario/storage';
 import { EARTH_MU, EARTH_RADIUS } from '@/sim/orbit/constants';
@@ -10,21 +11,32 @@ import {
   constellationAgentCount,
   type ConstellationDraft,
 } from '@/scenario/design/constellationGenerator';
+import { attachBusToAgents } from '@/scenario/design/agentBus';
+import { quoteProgram } from '@/scenario/design/pricing';
 import { ConstellationFormFields } from './ConstellationFormFields';
+import { QuoteSummary } from './QuoteSummary';
 import { designerField, designerHint, designerRow } from './designerStyles';
 
 export function ConstellationDesigner() {
   const loadScenario = useScenarioStore((s) => s.loadScenario);
   const currentScenario = useScenarioStore((s) => s.currentScenario);
+  const satelliteDraft = useDesignStore((s) => s.satelliteDraft);
   const [draft, setDraft] = useState<ConstellationDraft>(DEFAULT_CONSTELLATION_DRAFT);
   const [scenarioName, setScenarioName] = useState('Custom Constellation');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const count = useMemo(() => constellationAgentCount(draft), [draft]);
+  const programQuote = useMemo(
+    () => quoteProgram(satelliteDraft, count),
+    [satelliteDraft, count]
+  );
 
   const buildScenario = () => {
-    const agents = generateConstellationAgents(draft);
+    const agents = attachBusToAgents(
+      generateConstellationAgents(draft),
+      satelliteDraft
+    );
     return validateScenario({
       name: scenarioName.trim() || 'Custom Constellation',
       description: `${draft.pattern} constellation · ${agents.length} sats · designer`,
@@ -64,10 +76,13 @@ export function ConstellationDesigner() {
         setError('Load a scenario first, or use Load as new scenario.');
         return;
       }
-      const extra = generateConstellationAgents({
-        ...draft,
-        idPrefix: draft.idPrefix || 'sat',
-      });
+      const extra = attachBusToAgents(
+        generateConstellationAgents({
+          ...draft,
+          idPrefix: draft.idPrefix || 'sat',
+        }),
+        satelliteDraft
+      );
       // Avoid id collisions
       const existing = new Set(currentScenario.agents.map((a) => a.id));
       const renamed = extra.map((a) => {
@@ -127,6 +142,15 @@ export function ConstellationDesigner() {
         <span className="k">Total sats</span>
         <span className="v">{count}</span>
       </div>
+
+      <QuoteSummary
+        quote={programQuote}
+        title={`Program quote · ${satelliteDraft.name}`}
+        compact
+      />
+      <p style={{ ...designerHint, marginTop: 4 }}>
+        Bus config from Satellite designer · launch included
+      </p>
 
       <div className="ops-btn-group" style={{ marginTop: 10, flexWrap: 'wrap' }}>
         <button type="button" className="ops-btn active" onClick={() => load(false)}>

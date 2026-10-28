@@ -20,6 +20,7 @@ import { LaserEffects } from '@/render/LaserEffects';
 import { OpsShell } from '@/ui/ops/OpsShell';
 import { ProjectLibrary } from '@/ui/ops/ProjectLibrary';
 import { StudioShell } from '@/ui/ops/StudioShell';
+import { AnalysisShell } from '@/ui/ops/AnalysisShell';
 import { PerformanceOverlay } from '@/ui/PerformanceOverlay';
 import { PerformanceTracker } from '@/ui/PerformanceTracker';
 import { useCameraStore } from '@/ui/stores/cameraStore';
@@ -154,6 +155,9 @@ function App() {
   }
   if (appPhase === 'studio') {
     return <StudioShell />;
+  }
+  if (appPhase === 'analysis') {
+    return <AnalysisShell />;
   }
   return <OpsRuntime />;
 }

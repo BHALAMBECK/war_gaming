@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
+import { useDesignStore } from '@/ui/stores/designStore';
 import { downloadScenario } from '@/scenario/saver';
 import { saveToLocalStorage } from '@/scenario/storage';
 import { FIDELITY_LABELS } from '@/sim/orbit/fidelity';
@@ -12,19 +13,28 @@ import {
   type ScenarioWizardDraft,
   type ScenarioTemplate,
 } from '@/scenario/design/scenarioBuilder';
+import { attachBusToAgents } from '@/scenario/design/agentBus';
+import { quoteProgram } from '@/scenario/design/pricing';
+import { validateScenario } from '@/scenario/schema';
 import { ConstellationFormFields } from './ConstellationFormFields';
+import { QuoteSummary } from './QuoteSummary';
 import { designerField, designerHint, designerRow } from './designerStyles';
 
 const STEPS = ['Template', 'Fleet', 'Sim', 'Review'] as const;
 
 export function ScenarioDesigner() {
   const loadScenario = useScenarioStore((s) => s.loadScenario);
+  const satelliteDraft = useDesignStore((s) => s.satelliteDraft);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ScenarioWizardDraft>(DEFAULT_SCENARIO_WIZARD);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const agentCount = useMemo(() => previewAgentCount(draft), [draft]);
+  const programQuote = useMemo(
+    () => quoteProgram(satelliteDraft, Math.max(1, agentCount)),
+    [satelliteDraft, agentCount]
+  );
 
   const patch = (partial: Partial<ScenarioWizardDraft>) =>
     setDraft((d) => ({ ...d, ...partial }));
@@ -32,7 +42,13 @@ export function ScenarioDesigner() {
   const apply = (alsoSave: boolean) => {
     setError('');
     try {
-      const scenario = buildScenarioFromWizard(draft);
+      let scenario = buildScenarioFromWizard(draft);
+      if (scenario.agents.length > 0) {
+        scenario = validateScenario({
+          ...scenario,
+          agents: attachBusToAgents(scenario.agents, satelliteDraft),
+        });
+      }
       loadScenario(scenario);
       if (alsoSave) {
         saveToLocalStorage(scenario);
@@ -208,6 +224,10 @@ export function ScenarioDesigner() {
             <span className="k">dt</span>
             <span className="v">{draft.timeStep}s</span>
           </div>
+          <QuoteSummary
+            quote={programQuote}
+            title={`Program quote · ${satelliteDraft.name}`}
+          />
           <div className="ops-btn-group" style={{ marginTop: 10, flexWrap: 'wrap' }}>
             <button type="button" className="ops-btn active" onClick={() => apply(false)}>
               Load into sim
