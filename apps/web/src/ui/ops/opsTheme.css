@@ -615,24 +615,6 @@
   }
 }
 
-.ops-phase-nav {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 12px;
-  padding: 2px 4px;
-  border: 1px solid var(--ops-border);
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 2px;
-}
-
-/* Legacy — replaced by .ops-segmented; kept empty for safety */
-.ops-phase-nav-item,
-.ops-phase-sep,
-.ops-phase-link {
-  display: none;
-}
-
 .ops-stage-header .ops-phase-segmented {
   margin-left: 10px;
 }
