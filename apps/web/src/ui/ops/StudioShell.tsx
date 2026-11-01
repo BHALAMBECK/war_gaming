@@ -9,6 +9,8 @@ import { AnalysisHubPage } from './AnalysisHubPage';
 import { ScenarioSection } from '@/ui/ScenarioSection';
 import { PhaseNav } from './PhaseNav';
 import { SegmentedControl } from './SegmentedControl';
+import { StageBeams } from './StageBeams';
+import { MovingBorder } from './MovingBorder';
 
 const STUDIO_TABS = [
   { value: 'scenario', label: 'Scenario' },
@@ -31,6 +33,7 @@ export function StudioShell() {
 
   return (
     <div className="ops-stage">
+      <StageBeams />
       <header className="ops-stage-header studio">
         <div className="ops-brand">
           OSWV <span>Studio</span>
@@ -39,15 +42,12 @@ export function StudioShell() {
           {scenarioName || 'Untitled'} · {agents.length} sats
         </div>
         <PhaseNav current="studio" />
-        <div className="ops-btn-group" style={{ marginLeft: 'auto' }}>
-          <button
-            type="button"
-            className="ops-btn active"
-            onClick={() => setAppPhase('ops')}
-          >
-            Run live ops
-          </button>
-        </div>
+        <MovingBorder
+          className="ops-cta-moving-border"
+          onClick={() => setAppPhase('ops')}
+        >
+          Run live ops
+        </MovingBorder>
       </header>
 
       <div className="ops-studio-layout">

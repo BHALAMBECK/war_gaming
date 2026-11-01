@@ -2,6 +2,10 @@ import { useMemo, useState } from 'react';
 import { useOpsStore } from '@/ui/stores/opsStore';
 import { PhaseNav } from './PhaseNav';
 import { StageSpotlight } from './StageSpotlight';
+import { StageBeams } from './StageBeams';
+import { TiltCard } from './TiltCard';
+import { MovingBorder } from './MovingBorder';
+import { ShimmerText } from './ShimmerText';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
 import {
   EXAMPLE_SCENARIO_LABELS,
@@ -79,6 +83,7 @@ export function ProjectLibrary() {
 
   return (
     <div className="ops-stage">
+      <StageBeams />
       <header className="ops-stage-header">
         <div className="ops-brand">
           OSWV <span>Lattice Ops</span>
@@ -89,7 +94,9 @@ export function ProjectLibrary() {
       <main className="ops-stage-main">
         <StageSpotlight className="ops-library-hero">
           <p className="ops-eyebrow">Project library</p>
-          <h1 className="ops-stage-heading">Choose a project</h1>
+          <ShimmerText as="h1" className="ops-stage-heading">
+            Choose a project
+          </ShimmerText>
           <p className="ops-stage-lead">
             Open an example or saved scenario, design in Studio, then step into the
             live globe when you are ready to run.
@@ -105,9 +112,8 @@ export function ProjectLibrary() {
         <section>
           <p className="ops-eyebrow">Start here</p>
           <div className="ops-bento">
-            <button
-              type="button"
-              className="ops-project-card ops-bento-feature ops-glass-card"
+            <MovingBorder
+              className="ops-bento-feature-wrap"
               onClick={newBlank}
             >
               <span className="ops-card-kicker">Blank slate</span>
@@ -115,22 +121,20 @@ export function ProjectLibrary() {
               <span className="ops-card-desc">
                 Empty sandbox — configure fleet and sim in Studio.
               </span>
-            </button>
+            </MovingBorder>
             {scenarioName ? (
-              <button
-                type="button"
+              <TiltCard
                 className="ops-project-card ops-glass-card"
                 onClick={() => setAppPhase('studio')}
               >
                 <span className="ops-card-kicker">Continue</span>
                 <strong>Resume studio</strong>
                 <span className="ops-mono">{scenarioName}</span>
-              </button>
+              </TiltCard>
             ) : null}
             {examples.map((name) => (
-              <button
+              <TiltCard
                 key={name}
-                type="button"
                 className="ops-project-card ops-glass-card"
                 onClick={() => openExample(name)}
               >
@@ -139,7 +143,7 @@ export function ProjectLibrary() {
                 <span className="ops-card-desc">
                   {EXAMPLE_BLURBS[name] ?? name}
                 </span>
-              </button>
+              </TiltCard>
             ))}
           </div>
         </section>

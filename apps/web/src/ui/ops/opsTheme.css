@@ -1049,3 +1049,235 @@
 .ops-studio-nav .ops-btn:active:not(.active) {
   transform: scale(0.98);
 }
+
+/* —— Flashy staging effects (free / CSS-only) —— */
+.ops-stage-beams {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.75;
+}
+
+.ops-stage-beams-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ops-beam {
+  stroke-dasharray: 140 420;
+  stroke-dashoffset: 0;
+  opacity: 0.45;
+  animation: opsBeamTravel 9s linear infinite;
+}
+
+.ops-beam-b {
+  animation-duration: 11s;
+  animation-delay: -2.5s;
+  opacity: 0.35;
+}
+
+.ops-beam-c {
+  animation-duration: 13s;
+  animation-delay: -5s;
+  opacity: 0.28;
+}
+
+@keyframes opsBeamTravel {
+  to {
+    stroke-dashoffset: -560;
+  }
+}
+
+.ops-shimmer-text {
+  background-image: linear-gradient(
+    105deg,
+    #e8e8e8 0%,
+    #e8e8e8 38%,
+    #fff200 48%,
+    #ffffff 52%,
+    #fff200 58%,
+    #e8e8e8 68%,
+    #e8e8e8 100%
+  );
+  background-size: 220% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: opsTextShimmer 6s ease-in-out infinite;
+}
+
+@keyframes opsTextShimmer {
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+.ops-moving-border {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.ops-moving-border-track {
+  position: absolute;
+  inset: -120%;
+  background: conic-gradient(
+    from 0deg,
+    #fff200,
+    #e10600,
+    #7a0000,
+    rgba(0, 0, 0, 0.2),
+    #e10600,
+    #fff200
+  );
+  animation: opsBorderSpin 2.6s linear infinite;
+}
+
+@keyframes opsBorderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ops-moving-border-inner {
+  position: relative;
+  z-index: 1;
+  margin: 2px;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100%;
+  background: linear-gradient(
+    155deg,
+    rgba(28, 8, 8, 0.95) 0%,
+    rgba(12, 12, 12, 0.92) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.ops-bento-feature-wrap {
+  width: 100%;
+}
+
+@media (min-width: 720px) {
+  .ops-bento-feature-wrap {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .ops-bento-feature-wrap .ops-moving-border-inner {
+    min-height: 168px;
+    justify-content: flex-end;
+  }
+}
+
+.ops-bento-feature-wrap .ops-moving-border-inner strong {
+  font-size: 18px;
+}
+
+.ops-cta-moving-border {
+  margin-left: auto;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.ops-cta-moving-border .ops-moving-border-inner {
+  padding: 6px 16px;
+  font-family: var(--ops-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-align: center;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(
+    180deg,
+    rgba(225, 6, 0, 0.92) 0%,
+    rgba(120, 0, 0, 0.88) 100%
+  );
+  box-shadow: 0 0 24px rgba(225, 6, 0, 0.35);
+}
+
+.ops-tilt-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+  transition:
+    transform 0.14s ease-out,
+    box-shadow 0.2s ease;
+}
+
+.ops-tilt-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, 0.16),
+    transparent 55%
+  );
+}
+
+.ops-tilt-card:hover .ops-tilt-glare,
+.ops-tilt-card:focus-visible .ops-tilt-glare {
+  opacity: 1;
+}
+
+.ops-tilt-content {
+  position: relative;
+  z-index: 1;
+  display: contents;
+}
+
+.ops-project-card.ops-tilt-card:hover {
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg)) translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ops-beam,
+  .ops-shimmer-text,
+  .ops-moving-border-track,
+  .ops-stage::after {
+    animation: none !important;
+  }
+
+  .ops-shimmer-text {
+    color: var(--ops-text);
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+  }
+
+  .ops-tilt-card,
+  .ops-project-card.ops-tilt-card:hover {
+    transform: none !important;
+  }
+
+  .ops-tilt-glare {
+    display: none;
+  }
+}
