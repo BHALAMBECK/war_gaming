@@ -1,4 +1,5 @@
 import { useOpsStore, type AppPhase } from '@/ui/stores/opsStore';
+import { SegmentedControl } from './SegmentedControl';
 
 const PHASES: { id: AppPhase; label: string; short: string }[] = [
   { id: 'library', label: 'Project library', short: 'Library' },
@@ -18,26 +19,17 @@ export function PhaseNav({ current, compact }: PhaseNavProps) {
   const setAppPhase = useOpsStore((s) => s.setAppPhase);
 
   return (
-    <nav className="ops-phase-nav" aria-label="Application sections">
-      {PHASES.map((phase, index) => {
-        const active = current === phase.id;
-        const label = compact ? phase.short : phase.label;
-        return (
-          <span key={phase.id} className="ops-phase-nav-item">
-            {index > 0 ? <span className="ops-phase-sep" aria-hidden /> : null}
-            <button
-              type="button"
-              className={`ops-phase-link${active ? ' active' : ''}`}
-              aria-current={active ? 'page' : undefined}
-              title={phase.label}
-              disabled={active}
-              onClick={() => setAppPhase(phase.id)}
-            >
-              {label}
-            </button>
-          </span>
-        );
-      })}
-    </nav>
+    <SegmentedControl
+      className="ops-phase-segmented"
+      aria-label="Application sections"
+      size={compact ? 'sm' : 'md'}
+      value={current}
+      onChange={(v) => setAppPhase(v as AppPhase)}
+      options={PHASES.map((phase) => ({
+        value: phase.id,
+        label: compact ? phase.short : phase.label,
+        title: phase.label,
+      }))}
+    />
   );
 }

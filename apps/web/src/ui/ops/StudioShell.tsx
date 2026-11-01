@@ -8,13 +8,17 @@ import { SatelliteDesigner } from './SatelliteDesigner';
 import { AnalysisHubPage } from './AnalysisHubPage';
 import { ScenarioSection } from '@/ui/ScenarioSection';
 import { PhaseNav } from './PhaseNav';
+import { SegmentedControl } from './SegmentedControl';
 
-type StudioTab =
-  | 'scenario'
-  | 'satellite'
-  | 'constellation'
-  | 'load'
-  | 'analysis';
+const STUDIO_TABS = [
+  { value: 'scenario', label: 'Scenario' },
+  { value: 'satellite', label: 'Satellite' },
+  { value: 'constellation', label: 'Constellation' },
+  { value: 'load', label: 'Load / save' },
+  { value: 'analysis', label: 'Analysis' },
+] as const;
+
+type StudioTab = (typeof STUDIO_TABS)[number]['value'];
 
 /**
  * Design / analyze / build screen (no live ops globe).
@@ -48,31 +52,18 @@ export function StudioShell() {
 
       <div className="ops-studio-layout">
         <aside className="ops-studio-nav">
-          <div className="ops-section-title">Workspace</div>
-          {(
-            [
-              ['scenario', 'Scenario designer'],
-              ['satellite', 'Satellite designer'],
-              ['constellation', 'Constellation'],
-              ['load', 'Load / save'],
-              ['analysis', 'Analysis hub'],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              className={`ops-btn ${tab === id ? 'active' : ''}`}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                marginBottom: 4,
-              }}
-              onClick={() => setTab(id)}
-            >
-              {label}
-            </button>
-          ))}
+          <p className="ops-eyebrow">Workspace</p>
+          <SegmentedControl
+            layout="vertical"
+            fullWidth
+            aria-label="Studio workspace"
+            value={tab}
+            onChange={(v) => setTab(v as StudioTab)}
+            options={STUDIO_TABS.map((t) => ({
+              value: t.value,
+              label: t.label,
+            }))}
+          />
         </aside>
 
         <main className="ops-studio-main">
