@@ -312,16 +312,23 @@ export function getComponent(id: string): CatalogComponent | undefined {
 }
 
 export function getProfile(id: SatelliteProfileId): SatelliteProfile {
-  return (
-    SATELLITE_PROFILES.find((p) => p.id === id) ??
-    SATELLITE_PROFILES[0]
-  );
+  const found = SATELLITE_PROFILES.find((p) => p.id === id);
+  if (found) return found;
+  const fallback = SATELLITE_PROFILES[0];
+  if (!fallback) {
+    throw new Error('SATELLITE_PROFILES is empty');
+  }
+  return fallback;
 }
 
 export function getLaunchVehicle(id: LaunchVehicleId): LaunchVehicle {
-  return (
-    LAUNCH_VEHICLES.find((v) => v.id === id) ?? LAUNCH_VEHICLES[0]
-  );
+  const found = LAUNCH_VEHICLES.find((v) => v.id === id);
+  if (found) return found;
+  const fallback = LAUNCH_VEHICLES[0];
+  if (!fallback) {
+    throw new Error('LAUNCH_VEHICLES is empty');
+  }
+  return fallback;
 }
 
 export const CATEGORY_LABELS: Record<ComponentCategory, string> = {

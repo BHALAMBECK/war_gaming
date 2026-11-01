@@ -19,6 +19,7 @@ import { validateScenario } from '@/scenario/schema';
 import { ConstellationFormFields } from './ConstellationFormFields';
 import { QuoteSummary } from './QuoteSummary';
 import { designerField, designerHint, designerRow } from './designerStyles';
+import { WizardStepper } from './WizardStepper';
 
 const STEPS = ['Template', 'Fleet', 'Sim', 'Review'] as const;
 
@@ -64,25 +65,14 @@ export function ScenarioDesigner() {
 
   return (
     <div>
-      <div className="ops-section-title" style={{ marginTop: 0 }}>
-        Scenario Designer
-      </div>
+      <p className="ops-eyebrow" style={{ marginTop: 0 }}>
+        Scenario designer
+      </p>
       <p style={designerHint}>
         Guided form to build a valid scenario JSON and load it into the sim.
       </p>
 
-      <div className="ops-btn-group" style={{ marginBottom: 10, flexWrap: 'wrap' }}>
-        {STEPS.map((label, i) => (
-          <button
-            key={label}
-            type="button"
-            className={`ops-btn ${step === i ? 'active' : ''}`}
-            onClick={() => setStep(i)}
-          >
-            {i + 1}. {label}
-          </button>
-        ))}
-      </div>
+      <WizardStepper step={step} onStep={setStep} />
 
       {step === 0 && (
         <div>
