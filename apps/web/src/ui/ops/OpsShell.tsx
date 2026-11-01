@@ -19,6 +19,7 @@ import { SatelliteDesigner } from './SatelliteDesigner';
 import { startDemo } from '@/ui/demo/demoMode';
 import { useCallback, useRef, useState } from 'react';
 import { usePanelResize } from './usePanelResize';
+import { PhaseNav } from './PhaseNav';
 
 type ToolsTab = 'load' | 'scenario' | 'satellite' | 'constellation' | 'legacy';
 
@@ -55,7 +56,6 @@ export function OpsShell({
   const setLeftPanelWidth = useOpsStore((s) => s.setLeftPanelWidth);
   const setRightPanelWidth = useOpsStore((s) => s.setRightPanelWidth);
   const setBottomBarHeight = useOpsStore((s) => s.setBottomBarHeight);
-  const setAppPhase = useOpsStore((s) => s.setAppPhase);
   const formatTime = useSimClockStore((s) => s.formatTime);
   const paused = useSimClockStore((s) => s.paused);
   const toggle = useSimClockStore((s) => s.toggle);
@@ -242,6 +242,8 @@ export function OpsShell({
           OSWV <span>Lattice Ops</span>
         </div>
 
+        <PhaseNav current="ops" compact />
+
         <div className="ops-btn-group">
           <button
             type="button"
@@ -326,27 +328,6 @@ export function OpsShell({
             onClick={() => onToggleHide(true)}
           >
             Hide
-          </button>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('analysis')}
-          >
-            Analysis
-          </button>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('studio')}
-          >
-            Studio
-          </button>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('library')}
-          >
-            Library
           </button>
         </div>
 

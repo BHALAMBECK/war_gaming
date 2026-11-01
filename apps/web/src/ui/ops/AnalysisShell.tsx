@@ -2,6 +2,7 @@ import { useOpsStore } from '@/ui/stores/opsStore';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { AnalysisHubPage } from './AnalysisHubPage';
+import { PhaseNav } from './PhaseNav';
 
 /** Dedicated analysis page (no globe). */
 export function AnalysisShell() {
@@ -18,23 +19,10 @@ export function AnalysisShell() {
         <div className="ops-stage-subtitle ops-mono">
           {scenarioName || 'Untitled'} · {agents.length} sats
         </div>
+        <PhaseNav current="analysis" />
         <div className="ops-btn-group" style={{ marginLeft: 'auto' }}>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('library')}
-          >
-            Library
-          </button>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('studio')}
-          >
-            Studio
-          </button>
           <button type="button" className="ops-btn active" onClick={() => setAppPhase('ops')}>
-            Run ops
+            Run live ops
           </button>
         </div>
       </header>

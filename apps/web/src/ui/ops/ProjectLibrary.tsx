@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOpsStore } from '@/ui/stores/opsStore';
+import { PhaseNav } from './PhaseNav';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
 import {
   EXAMPLE_SCENARIO_LABELS,
@@ -74,12 +75,14 @@ export function ProjectLibrary() {
         <div className="ops-brand">
           OSWV <span>Lattice Ops</span>
         </div>
-        <div className="ops-stage-subtitle">Project library</div>
+        <PhaseNav current="library" />
       </header>
 
       <main className="ops-stage-main">
+        <h1 className="ops-stage-heading">Choose a project</h1>
         <p className="ops-stage-lead">
-          Pick a scenario to design and analyze, then run it in the ops console.
+          Open an example or saved scenario, design in Studio, then step into the
+          live globe when you are ready to run.
           {scenarioName ? (
             <>
               {' '}

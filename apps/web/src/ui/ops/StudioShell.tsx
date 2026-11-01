@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useOpsStore } from '@/ui/stores/opsStore';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
+import { useOpsStore } from '@/ui/stores/opsStore';
 import { ScenarioDesigner } from './ScenarioDesigner';
 import { ConstellationDesigner } from './ConstellationDesigner';
 import { SatelliteDesigner } from './SatelliteDesigner';
 import { AnalysisHubPage } from './AnalysisHubPage';
 import { ScenarioSection } from '@/ui/ScenarioSection';
+import { PhaseNav } from './PhaseNav';
 
 type StudioTab =
   | 'scenario'
@@ -33,27 +34,14 @@ export function StudioShell() {
         <div className="ops-stage-subtitle ops-mono">
           {scenarioName || 'Untitled'} · {agents.length} sats
         </div>
+        <PhaseNav current="studio" />
         <div className="ops-btn-group" style={{ marginLeft: 'auto' }}>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('library')}
-          >
-            Library
-          </button>
-          <button
-            type="button"
-            className="ops-btn"
-            onClick={() => setAppPhase('analysis')}
-          >
-            Analysis hub
-          </button>
           <button
             type="button"
             className="ops-btn active"
             onClick={() => setAppPhase('ops')}
           >
-            Run ops
+            Run live ops
           </button>
         </div>
       </header>
@@ -88,11 +76,13 @@ export function StudioShell() {
         </aside>
 
         <main className="ops-studio-main">
-          {tab === 'scenario' && <ScenarioDesigner />}
-          {tab === 'satellite' && <SatelliteDesigner />}
-          {tab === 'constellation' && <ConstellationDesigner />}
-          {tab === 'load' && <ScenarioSection isExpanded />}
-          {tab === 'analysis' && <AnalysisHubPage />}
+          <div key={tab} className="ops-studio-pane">
+            {tab === 'scenario' && <ScenarioDesigner />}
+            {tab === 'satellite' && <SatelliteDesigner />}
+            {tab === 'constellation' && <ConstellationDesigner />}
+            {tab === 'load' && <ScenarioSection isExpanded />}
+            {tab === 'analysis' && <AnalysisHubPage />}
+          </div>
         </main>
       </div>
     </div>

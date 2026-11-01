@@ -1,23 +1,24 @@
 export function Lighting() {
   return (
     <>
-      {/* Ambient light for overall scene illumination */}
-      <ambientLight intensity={0.3} />
-      
-      {/* Directional light simulating sun */}
+      <ambientLight intensity={0.12} />
+      <hemisphereLight
+        color="#b8d4ff"
+        groundColor="#050508"
+        intensity={0.35}
+      />
       <directionalLight
-        position={[5, 3, 5]}
-        intensity={1.5}
+        position={[8, 4, 6]}
+        intensity={2.4}
+        color="#fff8ee"
         castShadow={false}
       />
-      
-      {/* Additional fill light */}
       <directionalLight
-        position={[-5, -3, -5]}
-        intensity={0.3}
+        position={[-6, -2, -4]}
+        intensity={0.18}
+        color="#4466aa"
         castShadow={false}
       />
     </>
   );
 }
-
