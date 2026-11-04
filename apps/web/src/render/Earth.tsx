@@ -143,10 +143,10 @@ export function Earth({ radius = 1 }: EarthProps) {
     };
   }, []);
 
-  // Rotate Earth slowly for visual interest
-  useFrame(() => {
+  // Gentle visual spin (~one turn every ~10 minutes)
+  useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.0005;
+      meshRef.current.rotation.y += 0.01 * delta;
     }
   });
 

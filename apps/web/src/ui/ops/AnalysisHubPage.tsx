@@ -12,6 +12,7 @@ import { buildRunExport, downloadRunExport } from '@/util/runExport';
 import { quoteProgram } from '@/scenario/design/pricing';
 import { QuoteSummary } from './QuoteSummary';
 import { designerHint } from './designerStyles';
+import { showProject } from './studioNavigation';
 
 /**
  * Full-page analysis: scoring, fleet health, logs, exports, program quote.
@@ -203,7 +204,7 @@ export function AnalysisHubPage() {
         <button
           type="button"
           className="ops-btn"
-          onClick={() => setAppPhase('studio')}
+          onClick={showProject}
         >
           Studio
         </button>

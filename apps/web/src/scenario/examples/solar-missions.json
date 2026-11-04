@@ -1,0 +1,16 @@
+{
+  "name": "Solar Missions",
+  "description": "Tri-body constellation: Earth, Moon, and Mars local Kepler fleets plus a hero HEO craft. Stub expanded at load.",
+  "version": "1.0.0",
+  "earth": {
+    "radius": 6371000,
+    "mu": 3.986004418e14
+  },
+  "agents": [],
+  "sim": {
+    "timeStep": 1,
+    "initialTime": 0,
+    "fidelity": 0
+  },
+  "seed": "solar-missions-v1"
+}

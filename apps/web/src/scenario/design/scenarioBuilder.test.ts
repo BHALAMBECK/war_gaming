@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_SCENARIO_WIZARD,
   buildScenarioFromWizard,
+  nextScenarioStep,
   previewAgentCount,
+  scenarioStepOrder,
 } from './scenarioBuilder';
 import { FormationType } from '@/scenario/types';
 
@@ -88,5 +90,13 @@ describe('scenarioBuilder', () => {
     const a = buildScenarioFromWizard(draft);
     const b = buildScenarioFromWizard(draft);
     expect(a).toEqual(b);
+  });
+
+  it('skips the fleet step for an empty sandbox', () => {
+    expect(scenarioStepOrder('empty')).toEqual(['template', 'sim', 'review']);
+    expect(nextScenarioStep('empty', 'template')).toBe('sim');
+    expect(nextScenarioStep('single-constellation', 'template')).toBe('fleet');
+    expect(nextScenarioStep('opposing-fleets', 'fleet')).toBe('sim');
+    expect(nextScenarioStep('single-constellation', 'review')).toBeNull();
   });
 });

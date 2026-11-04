@@ -1,7 +1,7 @@
 /**
  * Orbit propagator using Kepler solver (analytical two-body problem).
  * Provides deterministic, stable propagation for elliptical orbits.
- * Fidelity tiers also expose J2-aware and RK4 numerical modes.
+ * Fidelity tiers also expose J2-aware and RK4 numerical modes (Earth only).
  */
 
 import { CartesianState, OrbitalElements } from './types';
@@ -10,24 +10,32 @@ import { EARTH_MU } from './constants';
 import { j2Acceleration } from './j2';
 import { propagateRk4 } from './rk4';
 import type { FidelityLevel } from './fidelity';
+import {
+  type CentralBody,
+  getBodyParams,
+  noteNonEarthFidelityRejected,
+  resolvePropagationFidelity,
+} from './bodies';
 
 /**
  * Propagate orbit using Kepler solver.
  * Converts state to orbital elements, advances mean anomaly, converts back.
- * 
- * @param state Initial Cartesian state in ECI frame
+ *
+ * @param state Initial Cartesian state in body-centered inertial frame
  * @param deltaTime Time step in seconds
+ * @param mu Gravitational parameter (defaults to Earth μ)
  * @returns New Cartesian state after propagation
  */
 export function propagateKepler(
   state: CartesianState,
-  deltaTime: number
+  deltaTime: number,
+  mu: number = EARTH_MU
 ): CartesianState {
   // Convert to orbital elements
-  const elements = cartesianToElements(state);
+  const elements = cartesianToElements(state, mu);
 
   // Calculate mean motion (rad/s)
-  const n = Math.sqrt(EARTH_MU / (elements.a * elements.a * elements.a));
+  const n = Math.sqrt(mu / (elements.a * elements.a * elements.a));
 
   // Get current mean anomaly from true anomaly
   const M0 = meanAnomalyFromTrue(elements.ν!, elements.e);
@@ -49,7 +57,7 @@ export function propagateKepler(
   };
 
   // Convert back to Cartesian state
-  return elementsToCartesian(newElements);
+  return elementsToCartesian(newElements, mu);
 }
 
 /**
@@ -91,24 +99,27 @@ function normalizeAngle(angle: number): number {
  * Propagate multiple states in batch (optimized for performance).
  * @param states Array of Cartesian states
  * @param deltaTime Time step in seconds
+ * @param mu Gravitational parameter (defaults to Earth μ)
  * @returns Array of new Cartesian states
  */
 export function propagateKeplerBatch(
   states: CartesianState[],
-  deltaTime: number
+  deltaTime: number,
+  mu: number = EARTH_MU
 ): CartesianState[] {
-  return states.map((state) => propagateKepler(state, deltaTime));
+  return states.map((state) => propagateKepler(state, deltaTime, mu));
 }
 
 /**
  * Medium fidelity: Kepler step + first-order J2 velocity kick (Encke-lite).
  * Cheap approximation — good visual nodal precession without full RK cost.
+ * Earth-only; callers must gate non-Earth bodies to Kepler.
  */
 export function propagateKeplerJ2(
   state: CartesianState,
   deltaTime: number
 ): CartesianState {
-  const kepler = propagateKepler(state, deltaTime);
+  const kepler = propagateKepler(state, deltaTime, EARTH_MU);
   const aJ2 = j2Acceleration(state.position);
   return {
     position: kepler.position,
@@ -121,30 +132,40 @@ export function propagateKeplerJ2(
 }
 
 /**
- * Dispatch propagation by fidelity tier.
- * 0 = Kepler, 1 = Kepler+J2 kick, 2 = RK4+J2
+ * Dispatch propagation by fidelity tier and central body.
+ * 0 = Kepler, 1 = Kepler+J2 kick, 2 = RK4+J2 (Earth only).
+ * Non-Earth: always Kepler with that body's μ.
  */
 export function propagateOrbit(
   state: CartesianState,
   deltaTime: number,
-  fidelity: FidelityLevel = 0
+  fidelity: FidelityLevel = 0,
+  centralBody: CentralBody = 'earth'
 ): CartesianState {
-  switch (fidelity) {
+  const effective = resolvePropagationFidelity(centralBody, fidelity);
+  if (effective !== fidelity) {
+    noteNonEarthFidelityRejected(centralBody);
+  }
+  const mu = getBodyParams(centralBody).mu;
+
+  switch (effective) {
     case 1:
       return propagateKeplerJ2(state, deltaTime);
     case 2:
       return propagateRk4(state, deltaTime, true);
     case 0:
     default:
-      return propagateKepler(state, deltaTime);
+      return propagateKepler(state, deltaTime, mu);
   }
 }
 
 export function propagateOrbitBatch(
   states: CartesianState[],
   deltaTime: number,
-  fidelity: FidelityLevel = 0
+  fidelity: FidelityLevel = 0,
+  centralBody: CentralBody = 'earth'
 ): CartesianState[] {
-  return states.map((state) => propagateOrbit(state, deltaTime, fidelity));
+  return states.map((state) =>
+    propagateOrbit(state, deltaTime, fidelity, centralBody)
+  );
 }
-

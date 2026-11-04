@@ -22,7 +22,7 @@ interface SimClockState {
 }
 
 export const useSimClockStore = create<SimClockState>((set, get) => ({
-  paused: false,
+  paused: true,
   timeScale: 1.0,
   simTime: 0,
   seed: 'default',

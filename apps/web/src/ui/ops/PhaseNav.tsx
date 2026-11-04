@@ -17,6 +17,7 @@ interface PhaseNavProps {
 /** Shared wayfinding across library, studio, analysis, and the live globe. */
 export function PhaseNav({ current, compact }: PhaseNavProps) {
   const setAppPhase = useOpsStore((s) => s.setAppPhase);
+  const setStudioFocus = useOpsStore((s) => s.setStudioFocus);
 
   return (
     <SegmentedControl
@@ -24,7 +25,11 @@ export function PhaseNav({ current, compact }: PhaseNavProps) {
       aria-label="Application sections"
       size={compact ? 'sm' : 'md'}
       value={current}
-      onChange={(v) => setAppPhase(v as AppPhase)}
+      onChange={(v) => {
+        const phase = v as AppPhase;
+        if (phase === 'studio') setStudioFocus('home');
+        setAppPhase(phase);
+      }}
       options={PHASES.map((phase) => ({
         value: phase.id,
         label: compact ? phase.short : phase.label,

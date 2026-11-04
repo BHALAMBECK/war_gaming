@@ -3,6 +3,11 @@ import {
   DEFAULT_SATELLITE_DRAFT,
   type SatelliteDraft,
 } from '@/scenario/design/satelliteBuilder';
+import {
+  DEFAULT_SCENARIO_WIZARD,
+  type ScenarioStepId,
+  type ScenarioWizardDraft,
+} from '@/scenario/design/scenarioBuilder';
 
 const STORAGE_KEY = 'oswv.design.satellite';
 
@@ -24,14 +29,31 @@ function persistDraft(draft: SatelliteDraft) {
   }
 }
 
+function freshScenarioDraft(): ScenarioWizardDraft {
+  return structuredClone(DEFAULT_SCENARIO_WIZARD);
+}
+
 interface DesignState {
   satelliteDraft: SatelliteDraft;
+  satelliteStep: number;
+  scenarioDraft: ScenarioWizardDraft;
+  scenarioStep: ScenarioStepId;
+  /** True while a scenario wizard is in progress and not yet run. */
+  scenarioDraftStarted: boolean;
   setSatelliteDraft: (draft: SatelliteDraft) => void;
   patchSatelliteDraft: (partial: Partial<SatelliteDraft>) => void;
+  setSatelliteStep: (step: number) => void;
+  patchScenarioDraft: (partial: Partial<ScenarioWizardDraft>) => void;
+  setScenarioStep: (step: ScenarioStepId) => void;
+  resetScenarioWizard: (started: boolean) => void;
 }
 
 export const useDesignStore = create<DesignState>((set) => ({
   satelliteDraft: loadDraft(),
+  satelliteStep: 0,
+  scenarioDraft: freshScenarioDraft(),
+  scenarioStep: 'template',
+  scenarioDraftStarted: false,
   setSatelliteDraft: (satelliteDraft) => {
     persistDraft(satelliteDraft);
     set({ satelliteDraft });
@@ -41,5 +63,16 @@ export const useDesignStore = create<DesignState>((set) => ({
       const satelliteDraft = { ...s.satelliteDraft, ...partial };
       persistDraft(satelliteDraft);
       return { satelliteDraft };
+    }),
+  setSatelliteStep: (step) =>
+    set({ satelliteStep: Math.max(0, Math.min(3, step)) }),
+  patchScenarioDraft: (partial) =>
+    set((s) => ({ scenarioDraft: { ...s.scenarioDraft, ...partial } })),
+  setScenarioStep: (scenarioStep) => set({ scenarioStep }),
+  resetScenarioWizard: (scenarioDraftStarted) =>
+    set({
+      scenarioDraft: freshScenarioDraft(),
+      scenarioStep: 'template',
+      scenarioDraftStarted,
     }),
 }));

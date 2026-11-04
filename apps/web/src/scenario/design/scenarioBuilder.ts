@@ -138,16 +138,58 @@ export const TEMPLATE_OPTIONS: {
   {
     value: 'single-constellation',
     label: 'One constellation',
-    blurb: 'Build a single fleet from a constellation pattern.',
+    blurb: 'Next: lay out the fleet.',
   },
   {
     value: 'opposing-fleets',
     label: 'Opposing fleets',
-    blurb: 'Friendly constellation vs enemy constellation.',
+    blurb: 'Next: lay out both fleets.',
   },
   {
     value: 'empty',
     label: 'Empty sandbox',
-    blurb: 'Metadata + sim settings only (0 sats).',
+    blurb: 'Next: set the clock. No satellites.',
   },
 ];
+
+export type ScenarioStepId = 'template' | 'fleet' | 'sim' | 'review';
+
+export const SCENARIO_STEP_LABEL: Record<ScenarioStepId, string> = {
+  template: 'Template',
+  fleet: 'Fleet',
+  sim: 'Sim',
+  review: 'Review',
+};
+
+/** Fleet is skipped for an empty sandbox — there is nothing to configure. */
+export function scenarioStepOrder(template: ScenarioTemplate): ScenarioStepId[] {
+  if (template === 'empty') return ['template', 'sim', 'review'];
+  return ['template', 'fleet', 'sim', 'review'];
+}
+
+export function coerceScenarioStep(
+  template: ScenarioTemplate,
+  step: ScenarioStepId
+): ScenarioStepId {
+  const order = scenarioStepOrder(template);
+  return order.includes(step) ? step : 'sim';
+}
+
+export function nextScenarioStep(
+  template: ScenarioTemplate,
+  step: ScenarioStepId
+): ScenarioStepId | null {
+  const order = scenarioStepOrder(template);
+  const index = order.indexOf(coerceScenarioStep(template, step));
+  return order[index + 1] ?? null;
+}
+
+export function prevScenarioStep(
+  template: ScenarioTemplate,
+  step: ScenarioStepId
+): ScenarioStepId | null {
+  const order = scenarioStepOrder(template);
+  const index = order.indexOf(coerceScenarioStep(template, step));
+  if (index <= 0) return null;
+  return order[index - 1] ?? null;
+}

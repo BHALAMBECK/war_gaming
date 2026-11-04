@@ -56,6 +56,8 @@ export function generateTestAgents(count: number): Agent[] {
       team,
       dvRemaining: 1000, // Default delta-v budget: 1000 m/s
       systems: createDefaultSystems(team),
+      centralBody: 'earth',
+      visualRole: 'constellation',
       selected: false,
       hovered: false,
     });

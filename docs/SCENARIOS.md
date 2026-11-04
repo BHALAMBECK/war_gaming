@@ -22,7 +22,7 @@ interface Scenario {
 }
 ```
 
-Agents may include `team`, `dvRemaining`, and behavior flags. Validation is Zod-based (`apps/web/src/scenario/schema.ts`).
+Agents may include `team`, `dvRemaining`, behavior flags, optional `centralBody` (`earth` | `moon` | `mars`, default `earth`), and optional `visualRole` (`constellation` | `hero`). COEs / Kepler use that body's μ. Validation is Zod-based (`apps/web/src/scenario/schema.ts`).
 
 ## Fidelity tiers
 
@@ -58,5 +58,6 @@ Run export JSON shape: `{ meta, trajectory, events }` with seed, fidelity, timeS
 | `simple-ring` | Ring formation, LEO |
 | `large-swarm` | Stub JSON; expands to **500** agents at load (`generateLargeSwarm.ts`) |
 | `task-demo` | Task allocation objectives |
+| `solar-missions` | Stub JSON; expands to **10 Earth + 10 Moon + 10 Mars + 1 hero** (`generateSolarMissions.ts`) |
 
 Path: `apps/web/src/scenario/examples/`.

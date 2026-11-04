@@ -24,7 +24,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   agents: [],
   selectedAgentId: null,
   hoveredAgentId: null,
-  setAgents: (agents) => set({ agents }),
+  setAgents: (agents) =>
+    set({
+      agents: agents.map((agent) => ({
+        ...agent,
+        centralBody: agent.centralBody ?? 'earth',
+        visualRole: agent.visualRole ?? 'constellation',
+      })),
+    }),
   updateAgent: (id, state) => {
     set((current) => ({
       agents: current.agents.map((agent) =>

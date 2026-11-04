@@ -1,33 +1,52 @@
 /**
- * Coordinate conversion utilities for ECI (Earth-Centered Inertial) to scene coordinates.
- * Scene uses normalized units where Earth radius = 1.
+ * Body-centered inertial position (meters) → scene units (body radius = 1).
  */
 
 import { EARTH_RADIUS } from '@/sim/orbit/constants';
 
 /**
- * Convert ECI position (meters) to scene coordinates (normalized units).
- * Scene uses Earth radius = 1 as the unit.
- * @param position ECI position in meters [x, y, z]
- * @returns Scene position in normalized units [x, y, z]
+ * Convert body-centered position (meters) to scene coordinates.
+ * Scene unit = body radius (surface at r = 1).
  */
-export function eciToScene(position: [number, number, number]): [number, number, number] {
+export function bodyToScene(
+  position: [number, number, number],
+  bodyRadius: number
+): [number, number, number] {
   return [
-    position[0] / EARTH_RADIUS,
-    position[1] / EARTH_RADIUS,
-    position[2] / EARTH_RADIUS,
+    position[0] / bodyRadius,
+    position[1] / bodyRadius,
+    position[2] / bodyRadius,
   ];
 }
 
 /**
- * Convert scene coordinates (normalized units) to ECI position (meters).
- * @param position Scene position in normalized units [x, y, z]
- * @returns ECI position in meters [x, y, z]
+ * Convert scene coordinates back to meters for a given body radius.
  */
-export function sceneToEci(position: [number, number, number]): [number, number, number] {
+export function sceneToBody(
+  position: [number, number, number],
+  bodyRadius: number
+): [number, number, number] {
   return [
-    position[0] * EARTH_RADIUS,
-    position[1] * EARTH_RADIUS,
-    position[2] * EARTH_RADIUS,
+    position[0] * bodyRadius,
+    position[1] * bodyRadius,
+    position[2] * bodyRadius,
   ];
+}
+
+/**
+ * Earth convenience: ECI meters → scene (Earth radius = 1).
+ */
+export function eciToScene(
+  position: [number, number, number]
+): [number, number, number] {
+  return bodyToScene(position, EARTH_RADIUS);
+}
+
+/**
+ * Scene → ECI meters (Earth radius = 1).
+ */
+export function sceneToEci(
+  position: [number, number, number]
+): [number, number, number] {
+  return sceneToBody(position, EARTH_RADIUS);
 }

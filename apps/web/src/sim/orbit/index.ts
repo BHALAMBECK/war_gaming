@@ -6,6 +6,7 @@
 
 export * from './types';
 export * from './constants';
+export * from './bodies';
 export * from './conversions';
 export * from './propagator';
 export * from './j2';

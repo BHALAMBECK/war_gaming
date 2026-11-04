@@ -4,9 +4,16 @@ import {
   FIDELITY_LABELS,
 } from '@/sim/orbit/fidelity';
 
-export type ViewMode = 'earth' | 'solar';
+/** Body-local views + schematic solar overview (alias: solar). */
+export type ViewMode = 'earth' | 'moon' | 'mars' | 'overview' | 'solar';
+
+export function isOverviewMode(mode: ViewMode): boolean {
+  return mode === 'overview' || mode === 'solar';
+}
 /** Library → Studio (design) → Analysis → Ops (live three-panel run). */
 export type AppPhase = 'library' | 'studio' | 'analysis' | 'ops';
+export type StudioFocus = 'home' | 'scenario' | 'satellite' | 'constellation';
+export type BuilderReturn = 'home' | 'scenario';
 export type { FidelityLevel };
 export { FIDELITY_LABELS };
 
@@ -82,6 +89,12 @@ interface OpsState {
   viewMode: ViewMode;
   fidelity: FidelityLevel;
   focusedBodyId: string | null;
+  /** True when Ops should show the start-sim launch overlay. */
+  pendingSimLaunch: boolean;
+  /** Studio screen. Builders hide the rest of the app. */
+  studioFocus: StudioFocus;
+  /** Where the satellite builder returns when it is opened from a scenario. */
+  builderReturn: BuilderReturn;
   leftPanelOpen: boolean;
   rightPanelOpen: boolean;
   engagementArmed: boolean;
@@ -92,6 +105,9 @@ interface OpsState {
   setViewMode: (mode: ViewMode) => void;
   setFidelity: (level: FidelityLevel) => void;
   setFocusedBodyId: (id: string | null) => void;
+  setPendingSimLaunch: (open: boolean) => void;
+  setStudioFocus: (focus: StudioFocus) => void;
+  setBuilderReturn: (next: BuilderReturn) => void;
   setLeftPanelOpen: (open: boolean) => void;
   setRightPanelOpen: (open: boolean) => void;
   setEngagementArmed: (armed: boolean) => void;
@@ -107,6 +123,9 @@ export const useOpsStore = create<OpsState>((set) => ({
   viewMode: 'earth',
   fidelity: 0,
   focusedBodyId: null,
+  pendingSimLaunch: false,
+  studioFocus: 'home',
+  builderReturn: 'home',
   leftPanelOpen: true,
   rightPanelOpen: true,
   engagementArmed: false,
@@ -117,6 +136,9 @@ export const useOpsStore = create<OpsState>((set) => ({
   setViewMode: (viewMode) => set({ viewMode }),
   setFidelity: (fidelity) => set({ fidelity }),
   setFocusedBodyId: (focusedBodyId) => set({ focusedBodyId }),
+  setPendingSimLaunch: (pendingSimLaunch) => set({ pendingSimLaunch }),
+  setStudioFocus: (studioFocus) => set({ studioFocus }),
+  setBuilderReturn: (builderReturn) => set({ builderReturn }),
   setLeftPanelOpen: (leftPanelOpen) => set({ leftPanelOpen }),
   setRightPanelOpen: (rightPanelOpen) => set({ rightPanelOpen }),
   setEngagementArmed: (engagementArmed) => set({ engagementArmed }),

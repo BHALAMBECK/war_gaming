@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
 import { useDesignStore } from '@/ui/stores/designStore';
-import { downloadScenario } from '@/scenario/saver';
 import { saveToLocalStorage } from '@/scenario/storage';
 import { EARTH_MU, EARTH_RADIUS } from '@/sim/orbit/constants';
 import { validateScenario } from '@/scenario/schema';
@@ -16,14 +15,16 @@ import { quoteProgram } from '@/scenario/design/pricing';
 import { ConstellationFormFields } from './ConstellationFormFields';
 import { QuoteSummary } from './QuoteSummary';
 import { designerField, designerHint, designerRow } from './designerStyles';
+import { BuilderFooter } from './BuilderFooter';
+import { runLoadedScenario, showProject } from './studioNavigation';
 
 export function ConstellationDesigner() {
   const loadScenario = useScenarioStore((s) => s.loadScenario);
   const currentScenario = useScenarioStore((s) => s.currentScenario);
   const satelliteDraft = useDesignStore((s) => s.satelliteDraft);
+  const adding = (currentScenario?.agents.length ?? 0) > 0;
   const [draft, setDraft] = useState<ConstellationDraft>(DEFAULT_CONSTELLATION_DRAFT);
   const [scenarioName, setScenarioName] = useState('Custom Constellation');
-  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const count = useMemo(() => constellationAgentCount(draft), [draft]);
@@ -52,81 +53,72 @@ export function ConstellationDesigner() {
     });
   };
 
-  const load = (alsoSave: boolean) => {
+  const mergeIntoCurrent = () => {
+    if (!currentScenario) {
+      throw new Error('Load a scenario first');
+    }
+    const extra = attachBusToAgents(
+      generateConstellationAgents({
+        ...draft,
+        idPrefix: draft.idPrefix || 'sat',
+      }),
+      satelliteDraft
+    );
+    const existing = new Set(currentScenario.agents.map((a) => a.id));
+    const renamed = extra.map((a) => {
+      let id = a.id;
+      let n = 0;
+      while (existing.has(id)) {
+        id = `${a.id}-m${n}`;
+        n += 1;
+      }
+      existing.add(id);
+      return { ...a, id };
+    });
+    return validateScenario({
+      ...currentScenario,
+      agents: [...currentScenario.agents, ...renamed],
+      description: `${currentScenario.description} + merged ${renamed.length} sats`,
+    });
+  };
+
+  const commit = () => {
     setError('');
     try {
-      const scenario = buildScenario();
+      const scenario =
+        adding && currentScenario ? mergeIntoCurrent() : buildScenario();
       loadScenario(scenario);
-      if (alsoSave) {
+      try {
         saveToLocalStorage(scenario);
-        downloadScenario(scenario);
+      } catch {
+        /* the sim can still start if local save fails */
       }
-      setStatus(
-        `Loaded ${scenario.name} · ${scenario.agents.length} sats (${draft.pattern})`
-      );
+      useDesignStore.getState().resetScenarioWizard(false);
+      runLoadedScenario();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to build constellation');
     }
   };
 
-  const mergeIntoCurrent = () => {
-    setError('');
-    try {
-      if (!currentScenario) {
-        setError('Load a scenario first, or use Load as new scenario.');
-        return;
-      }
-      const extra = attachBusToAgents(
-        generateConstellationAgents({
-          ...draft,
-          idPrefix: draft.idPrefix || 'sat',
-        }),
-        satelliteDraft
-      );
-      // Avoid id collisions
-      const existing = new Set(currentScenario.agents.map((a) => a.id));
-      const renamed = extra.map((a) => {
-        let id = a.id;
-        let n = 0;
-        while (existing.has(id)) {
-          id = `${a.id}-m${n}`;
-          n += 1;
-        }
-        existing.add(id);
-        return { ...a, id };
-      });
-      const scenario = validateScenario({
-        ...currentScenario,
-        agents: [...currentScenario.agents, ...renamed],
-        description: `${currentScenario.description} + merged ${renamed.length} sats`,
-      });
-      loadScenario(scenario);
-      setStatus(
-        `Merged ${renamed.length} sats → ${scenario.agents.length} total`
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Merge failed');
-    }
-  };
-
   return (
-    <div>
-      <div className="ops-section-title" style={{ marginTop: 0 }}>
-        Constellation Designer
-      </div>
+    <div className="ops-builder">
+      <div className="ops-builder-body">
       <p style={designerHint}>
-        Design a ring, Walker-delta, or random shell, then load it as a scenario
-        or merge into the current one.
+        {adding
+          ? 'Shape the shell. The next step adds it to this project and runs.'
+          : 'Shape the shell. The next step runs it.'}
       </p>
 
-      <label style={designerRow}>
-        <span className="ops-label">Scenario name</span>
-        <input
-          style={designerField}
-          value={scenarioName}
-          onChange={(e) => setScenarioName(e.target.value)}
-        />
-      </label>
+      {!adding && (
+        <label style={designerRow}>
+          <span className="ops-label">Scenario name</span>
+          <input
+            style={designerField}
+            value={scenarioName}
+            onChange={(e) => setScenarioName(e.target.value)}
+          />
+        </label>
+      )}
       <label style={designerRow}>
         <span className="ops-label">Seed (shell RNG)</span>
         <input
@@ -148,32 +140,18 @@ export function ConstellationDesigner() {
         title={`Program quote · ${satelliteDraft.name}`}
         compact
       />
-      <p style={{ ...designerHint, marginTop: 4 }}>
-        Bus config from Satellite designer · launch included
-      </p>
-
-      <div className="ops-btn-group" style={{ marginTop: 10, flexWrap: 'wrap' }}>
-        <button type="button" className="ops-btn active" onClick={() => load(false)}>
-          Load as new scenario
-        </button>
-        <button type="button" className="ops-btn" onClick={() => load(true)}>
-          Load + save/download
-        </button>
-        <button type="button" className="ops-btn" onClick={mergeIntoCurrent}>
-          Merge into current
-        </button>
-      </div>
-
-      {status && (
-        <p style={{ ...designerHint, color: 'var(--ops-warn)', marginTop: 8 }}>
-          {status}
-        </p>
-      )}
       {error && (
         <p style={{ ...designerHint, color: 'var(--ops-danger)', marginTop: 8 }}>
           {error}
         </p>
       )}
+      </div>
+      <BuilderFooter
+        backLabel="Project"
+        onBack={showProject}
+        primaryLabel={adding ? 'Add these satellites and run' : 'Run this constellation'}
+        onPrimary={commit}
+      />
     </div>
   );
 }

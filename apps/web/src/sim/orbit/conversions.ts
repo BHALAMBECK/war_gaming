@@ -10,11 +10,15 @@ import { OrbitalElements, CartesianState } from './types';
 import { EARTH_MU } from './constants';
 
 /**
- * Convert orbital elements to Cartesian state.
+ * Convert orbital elements to Cartesian state (body-centered inertial).
  * @param elements Orbital elements (must have either ν or M)
- * @returns Cartesian state in ECI frame
+ * @param mu Gravitational parameter (defaults to Earth μ)
+ * @returns Cartesian state relative to the central body
  */
-export function elementsToCartesian(elements: OrbitalElements): CartesianState {
+export function elementsToCartesian(
+  elements: OrbitalElements,
+  mu: number = EARTH_MU
+): CartesianState {
   const { a, e, i, Ω, ω } = elements;
 
   // Determine true anomaly
@@ -43,13 +47,13 @@ export function elementsToCartesian(elements: OrbitalElements): CartesianState {
   ];
 
   // Velocity in perifocal frame
-  const h = Math.sqrt(EARTH_MU * p); // Specific angular momentum
+  const h = Math.sqrt(mu * p); // Specific angular momentum
   // For circular orbits (e=0), the formula simplifies correctly
   // vPerifocal = [-(μ/h)sin(ν), (μ/h)(e+cos(ν)), 0]
   // When e=0: [-(μ/h)sin(ν), (μ/h)cos(ν), 0]
   const vPerifocal: [number, number, number] = [
-    -(EARTH_MU / h) * Math.sin(ν),
-    (EARTH_MU / h) * (e + Math.cos(ν)),
+    -(mu / h) * Math.sin(ν),
+    (mu / h) * (e + Math.cos(ν)),
     0,
   ];
 
@@ -92,11 +96,15 @@ export function elementsToCartesian(elements: OrbitalElements): CartesianState {
 }
 
 /**
- * Convert Cartesian state to orbital elements.
- * @param state Cartesian state in ECI frame
+ * Convert Cartesian state to orbital elements (body-centered inertial).
+ * @param state Cartesian state relative to the central body
+ * @param mu Gravitational parameter (defaults to Earth μ)
  * @returns Orbital elements (with true anomaly ν)
  */
-export function cartesianToElements(state: CartesianState): OrbitalElements {
+export function cartesianToElements(
+  state: CartesianState,
+  mu: number = EARTH_MU
+): OrbitalElements {
   const [x, y, z] = state.position;
   const [vx, vy, vz] = state.velocity;
 
@@ -111,21 +119,21 @@ export function cartesianToElements(state: CartesianState): OrbitalElements {
   const h = Math.sqrt(hx * hx + hy * hy + hz * hz);
 
   // Specific energy (vis-viva energy)
-  const energy = (v * v) / 2 - EARTH_MU / r;
+  const energy = (v * v) / 2 - mu / r;
 
   // Semi-major axis from vis-viva equation: v² = μ(2/r - 1/a)
   // Rearranging: 1/a = 2/r - v²/μ, so a = 1/(2/r - v²/μ)
   // This works for all orbit types (elliptical, circular, parabolic, hyperbolic)
   // For elliptical: energy < 0, so a > 0
   // For circular: energy = -μ/(2r), so a = r
-  let a = 1 / (2 / r - (v * v) / EARTH_MU);
+  let a = 1 / (2 / r - (v * v) / mu);
   
   // If result is negative or very large, it might be hyperbolic (energy > 0)
   // For our purposes (satellites), we expect elliptical orbits, so a should be positive
   if (a < 0 || !isFinite(a)) {
     // Fallback to energy formula for elliptical orbits
     if (energy < 0) {
-      a = -EARTH_MU / (2 * energy);
+      a = -mu / (2 * energy);
     } else {
       throw new Error('Invalid orbit: hyperbolic orbit detected (energy > 0)');
     }
@@ -134,9 +142,9 @@ export function cartesianToElements(state: CartesianState): OrbitalElements {
   // Eccentricity vector
   const v2 = v * v;
   const rv = x * vx + y * vy + z * vz;
-  const ex = (1 / EARTH_MU) * ((v2 - EARTH_MU / r) * x - rv * vx);
-  const ey = (1 / EARTH_MU) * ((v2 - EARTH_MU / r) * y - rv * vy);
-  const ez = (1 / EARTH_MU) * ((v2 - EARTH_MU / r) * z - rv * vz);
+  const ex = (1 / mu) * ((v2 - mu / r) * x - rv * vx);
+  const ey = (1 / mu) * ((v2 - mu / r) * y - rv * vy);
+  const ez = (1 / mu) * ((v2 - mu / r) * z - rv * vz);
   const e = Math.sqrt(ex * ex + ey * ey + ez * ez);
 
   // Inclination
@@ -197,7 +205,7 @@ export function cartesianToElements(state: CartesianState): OrbitalElements {
     }
   } else {
     const cosν = rDotE / (r * e);
-    const sinν = rv / (r * Math.sqrt(EARTH_MU * a * (1 - e * e)));
+    const sinν = rv / (r * Math.sqrt(mu * a * (1 - e * e)));
     ν = Math.atan2(sinν, cosν);
     if (ν < 0) {
       ν += 2 * Math.PI;

@@ -171,10 +171,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
+  padding: 4px 6px;
   border-bottom: 1px solid var(--ops-border);
   border-top: 2px solid var(--ops-warn);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -184,6 +184,7 @@
     rgba(225, 6, 0, 0.18) 0%,
     transparent 60%
   );
+  flex-shrink: 0;
 }
 
 .ops-panel-body {
@@ -273,16 +274,68 @@
   color: var(--ops-text);
 }
 
+.ops-tracks-body {
+  padding: 2px 4px 4px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ops-tracks-filters {
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ops-btn-compact {
+  font-size: 9px;
+  padding: 1px 5px;
+  line-height: 1.2;
+}
+
+.ops-tracks-filter {
+  width: 100%;
+  margin-bottom: 2px;
+  padding: 1px 4px;
+  background: var(--ops-panel-2);
+  border: 1px solid var(--ops-border);
+  color: var(--ops-text);
+  font-size: 9px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.ops-tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ops-accent) transparent;
+}
+
+.ops-tracks-overflow {
+  font-size: 10px;
+  color: var(--ops-muted);
+  margin-top: 4px;
+}
+
 .ops-entity {
   display: grid;
-  grid-template-columns: 8px 1fr auto;
-  gap: 6px;
+  grid-template-columns: 5px minmax(0, 1fr) 28px 24px;
+  gap: 3px;
   align-items: center;
-  padding: 4px 6px;
+  padding: 0 3px;
   border: 1px solid transparent;
   cursor: pointer;
-  font-size: 11px;
-  margin-bottom: 1px;
+  font-size: 9px;
+  line-height: 1.15;
+  min-height: 15px;
+  height: 15px;
+  box-sizing: border-box;
 }
 
 .ops-entity:hover {
@@ -296,20 +349,33 @@
   box-shadow: inset 2px 0 0 var(--ops-warn);
 }
 
+.ops-entity-id {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ops-entity-pct {
+  color: var(--ops-muted);
+  text-align: right;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
 .ops-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
 .ops-dot.friendly {
   background: var(--ops-friendly);
-  box-shadow: 0 0 6px rgba(225, 6, 0, 0.7);
+  box-shadow: 0 0 4px rgba(225, 6, 0, 0.7);
 }
 
 .ops-dot.enemy {
   background: var(--ops-enemy);
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.35);
 }
 
 .ops-section-title {
@@ -338,9 +404,9 @@
 }
 
 .ops-hp {
-  height: 4px;
+  height: 2px;
   background: rgba(255, 255, 255, 0.08);
-  margin-top: 4px;
+  min-width: 0;
 }
 
 .ops-hp > i {
@@ -1281,3 +1347,211 @@
     display: none;
   }
 }
+
+/* —— Sim launch overlay (Library → Ops) —— */
+.ops-launch-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(2, 6, 12, 0.55);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.ops-launch-panel {
+  width: min(420px, 100%);
+  padding: 22px 24px 20px;
+  border: 1px solid var(--ops-border-strong);
+  background: rgba(10, 16, 24, 0.92);
+}
+
+.ops-launch-title {
+  margin: 4px 0 10px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.ops-launch-lead {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ops-muted, #9aa7b8);
+}
+
+.ops-launch-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ops-launch-presets {
+  flex-wrap: wrap;
+}
+
+.ops-launch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ops-empty-ops {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none;
+  text-align: center;
+  padding: 24px;
+}
+
+.ops-empty-ops h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ops-empty-ops p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ops-muted, #9aa7b8);
+  max-width: 320px;
+}
+
+.ops-text-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  color: var(--ops-muted);
+  font-family: var(--ops-font);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.ops-text-btn:hover:not(:disabled) {
+  color: var(--ops-text);
+}
+
+.ops-text-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ops-btn-primary {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+.ops-launch-actions .ops-btn-primary {
+  width: 100%;
+}
+
+.ops-launch-links,
+.ops-bench-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+button.ops-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  gap: 4px;
+}
+
+button.ops-choice strong {
+  font-size: 13px;
+}
+
+button.ops-choice span {
+  font-size: 11px;
+  color: var(--ops-muted);
+  font-weight: 400;
+}
+
+button.ops-choice.active span {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ops-wizard-step-btn:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.ops-focus-header .ops-text-btn {
+  margin-left: auto;
+}
+
+.ops-studio-main-focus {
+  max-width: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.ops-builder {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+}
+
+.ops-builder-body {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  padding: 12px 20px 24px;
+}
+
+.ops-builder-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(640px, 100%);
+  margin: auto auto 0;
+  padding: 8px 20px 20px;
+}
+
+.ops-bench {
+  max-width: 560px;
+}
+
+.ops-bench-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+}
+
+.ops-controls-drawer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: min(360px, calc(100% - 16px));
+  max-height: calc(100% - 16px);
+  overflow: auto;
+  z-index: 6;
+  pointer-events: auto;
+  background: var(--ops-panel);
+  border: 1px solid var(--ops-border);
+  padding: 8px;
+}
+

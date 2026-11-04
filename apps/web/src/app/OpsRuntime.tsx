@@ -4,10 +4,13 @@ import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
 import { Earth } from '@/render/Earth';
 import { Moon } from '@/render/Moon';
+import { Mars } from '@/render/Mars';
+import { LocalMoon } from '@/render/LocalBody';
 import { Starfield } from '@/render/Starfield';
 import { Lighting } from '@/render/Lighting';
 import { CameraController } from '@/render/CameraController';
 import { Agents } from '@/render/Agents';
+import { AgentSimLoop } from '@/render/AgentSimLoop';
 import { OrbitPath } from '@/render/OrbitPath';
 import { Objectives } from '@/render/Objectives';
 import { TrajectoryPreview } from '@/render/TrajectoryPreview';
@@ -19,44 +22,62 @@ import {
 import { SensorFrustum } from '@/render/SensorFrustum';
 import { LaserEffects } from '@/render/LaserEffects';
 import { OpsShell } from '@/ui/ops/OpsShell';
+import { SimLaunchOverlay } from '@/ui/ops/SimLaunchOverlay';
 import { PerformanceOverlay } from '@/ui/PerformanceOverlay';
 import { PerformanceTracker } from '@/ui/PerformanceTracker';
 import { useCameraStore } from '@/ui/stores/cameraStore';
-import { useOpsStore } from '@/ui/stores/opsStore';
+import { useOpsStore, isOverviewMode } from '@/ui/stores/opsStore';
 import { useSimClock } from '@/sim/useSimClock';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useScenarioStore } from '@/ui/stores/scenarioStore';
-import { generateTestAgents } from '@/util/generateTestAgents';
+import type { CentralBody } from '@/sim/orbit/bodies';
 
-function EarthScene() {
+function BodyLocalScene({ body }: { body: CentralBody }) {
   const preset = useCameraStore((state) => state.preset);
   const enableOrbitControls = preset === 'freecam';
+  const minDistance = preset === 'zoomIn' ? 0.2 : 1.2;
 
   useSimClock();
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+      <PerspectiveCamera
+        makeDefault
+        position={[0, 0, 5]}
+        fov={50}
+        near={0.02}
+        far={5000}
+      />
       {enableOrbitControls && (
         <OrbitControls
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={1.2}
+          minDistance={minDistance}
           maxDistance={20}
         />
       )}
-      <CameraController />
+      <CameraController centralBody={body} />
       <Lighting />
       <Starfield />
-      <Earth radius={1} />
-      <Moon />
-      <Agents />
+      {body === 'earth' && (
+        <>
+          <Earth radius={1} />
+          <Moon />
+        </>
+      )}
+      {body === 'moon' && <LocalMoon radius={1} />}
+      {body === 'mars' && <Mars radius={1} />}
+      <Agents centralBody={body} />
       <OrbitPath />
-      <TrajectoryPreview />
-      <Objectives />
-      <SensorFrustum />
-      <LaserEffects />
+      {body === 'earth' && (
+        <>
+          <TrajectoryPreview />
+          <Objectives />
+          <SensorFrustum />
+          <LaserEffects />
+        </>
+      )}
     </>
   );
 }
@@ -84,20 +105,48 @@ function SolarScene() {
 }
 
 function SceneBootstrap() {
-  const setAgents = useAgentStore((state) => state.setAgents);
-  const agents = useAgentStore((state) => state.agents);
   const currentScenario = useScenarioStore((state) => state.currentScenario);
   const loadScenario = useScenarioStore((state) => state.loadScenario);
 
   useEffect(() => {
     if (currentScenario) {
       loadScenario(currentScenario);
-    } else if (agents.length === 0) {
-      setAgents(generateTestAgents(500));
     }
-  }, [setAgents, currentScenario, loadScenario, agents.length]);
+  }, [currentScenario, loadScenario]);
 
   return null;
+}
+
+function OpsEmptyState() {
+  const currentScenario = useScenarioStore((s) => s.currentScenario);
+  const agents = useAgentStore((s) => s.agents);
+  const pendingLaunch = useOpsStore((s) => s.pendingSimLaunch);
+
+  if (currentScenario || agents.length > 0 || pendingLaunch) {
+    return null;
+  }
+
+  return (
+    <div className="ops-empty-ops">
+      <h2>No project loaded</h2>
+      <p>Open a project from the Library to see the visual and start a sim.</p>
+    </div>
+  );
+}
+
+function ActiveScene() {
+  const viewMode = useOpsStore((s) => s.viewMode);
+
+  if (isOverviewMode(viewMode)) {
+    return <SolarScene />;
+  }
+  if (viewMode === 'moon') {
+    return <BodyLocalScene body="moon" />;
+  }
+  if (viewMode === 'mars') {
+    return <BodyLocalScene body="mars" />;
+  }
+  return <BodyLocalScene body="earth" />;
 }
 
 export function OpsRuntime() {
@@ -105,7 +154,6 @@ export function OpsRuntime() {
   const [performanceOverlayVisible, setPerformanceOverlayVisible] =
     useState(false);
   const [fps, setFps] = useState(0);
-  const viewMode = useOpsStore((s) => s.viewMode);
 
   return (
     <div
@@ -131,11 +179,13 @@ export function OpsRuntime() {
           inset: 0,
           width: '100%',
           height: '100%',
-          background: 'radial-gradient(ellipse at 50% 120%, #0a1525 0%, #030508 55%, #000 100%)',
+          background:
+            'radial-gradient(ellipse at 50% 120%, #0a1525 0%, #030508 55%, #000 100%)',
         }}
       >
         <SceneBootstrap />
-        {viewMode === 'earth' ? <EarthScene /> : <SolarScene />}
+        <AgentSimLoop />
+        <ActiveScene />
         <PerformanceTracker
           enabled={performanceOverlayVisible}
           onFpsUpdate={setFps}
@@ -147,6 +197,8 @@ export function OpsRuntime() {
         performanceOverlayVisible={performanceOverlayVisible}
         onPerformanceOverlayToggle={setPerformanceOverlayVisible}
       />
+      <OpsEmptyState />
+      <SimLaunchOverlay />
       <PerformanceOverlay visible={performanceOverlayVisible} fps={fps} />
     </div>
   );

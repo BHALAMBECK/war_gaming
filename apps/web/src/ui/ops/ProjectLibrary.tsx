@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useOpsStore } from '@/ui/stores/opsStore';
 import { PhaseNav } from './PhaseNav';
 import { StageSpotlight } from './StageSpotlight';
 import { StageBeams } from './StageBeams';
@@ -20,21 +19,27 @@ import {
 } from '@/scenario/storage';
 import { DEFAULT_SCENARIO_WIZARD } from '@/scenario/design/scenarioBuilder';
 import { buildScenarioFromWizard } from '@/scenario/design/scenarioBuilder';
+import { openProjectInOps } from './openProjectInOps';
+import { resumeStudio, startScenario } from './studioNavigation';
+import { useDesignStore } from '@/ui/stores/designStore';
 
 const EXAMPLE_BLURBS: Partial<Record<ExampleScenarioName, string>> = {
   demo: 'Small fleet for smoke tests and demos.',
   'task-demo': 'Agents with objectives and tasking.',
   'large-swarm': 'Stress the renderer with 500 tracks.',
   'simple-ring': 'Classic ring constellation layout.',
+  'solar-missions':
+    'Tri-body constellation: Earth, Moon, Mars + hero HEO craft.',
 };
 
 /**
  * Full-screen project / scenario library (AppPhase = library).
  */
 export function ProjectLibrary() {
-  const setAppPhase = useOpsStore((s) => s.setAppPhase);
   const loadScenario = useScenarioStore((s) => s.loadScenario);
   const scenarioName = useScenarioStore((s) => s.scenarioName);
+  const draftStarted = useDesignStore((s) => s.scenarioDraftStarted);
+  const draftName = useDesignStore((s) => s.scenarioDraft.name);
   const [saved, setSaved] = useState(() => listLocalStorageScenarios());
   const [error, setError] = useState('');
 
@@ -42,9 +47,7 @@ export function ProjectLibrary() {
 
   const openExample = (name: ExampleScenarioName) => {
     try {
-      const scenario = loadExampleScenario(name);
-      loadScenario(scenario);
-      setAppPhase('studio');
+      openProjectInOps(loadExampleScenario(name));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load example');
     }
@@ -54,8 +57,7 @@ export function ProjectLibrary() {
     try {
       const scenario = loadFromLocalStorage(name);
       if (!scenario) throw new Error('Not found in local storage');
-      loadScenario(scenario);
-      setAppPhase('studio');
+      openProjectInOps(scenario);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to open project');
     }
@@ -70,13 +72,18 @@ export function ProjectLibrary() {
         description: 'New project from library',
       });
       loadScenario(scenario);
-      setAppPhase('studio');
+      startScenario();
+      useDesignStore.getState().patchScenarioDraft({
+        name: 'Untitled Project',
+        description: 'New project from library',
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to create project');
     }
   };
 
   const removeSaved = (name: string) => {
+    if (!window.confirm(`Delete "${name}" from this device?`)) return;
     deleteFromLocalStorage(name);
     setSaved(listLocalStorageScenarios());
   };
@@ -98,8 +105,7 @@ export function ProjectLibrary() {
             Choose a project
           </ShimmerText>
           <p className="ops-stage-lead">
-            Open an example or saved scenario, design in Studio, then step into the
-            live globe when you are ready to run.
+            Start a scenario, or open a project and start the sim.
             {scenarioName ? (
               <>
                 {' '}
@@ -116,20 +122,22 @@ export function ProjectLibrary() {
               className="ops-bento-feature-wrap"
               onClick={newBlank}
             >
-              <span className="ops-card-kicker">Blank slate</span>
-              <strong>New blank project</strong>
+              <span className="ops-card-kicker">Build</span>
+              <strong>New scenario</strong>
               <span className="ops-card-desc">
-                Empty sandbox — configure fleet and sim in Studio.
+                Walk through the fleet and the clock, one step at a time.
               </span>
             </MovingBorder>
             {scenarioName ? (
               <TiltCard
                 className="ops-project-card ops-glass-card"
-                onClick={() => setAppPhase('studio')}
+                onClick={resumeStudio}
               >
                 <span className="ops-card-kicker">Continue</span>
-                <strong>Resume studio</strong>
-                <span className="ops-mono">{scenarioName}</span>
+                <strong>{draftStarted ? 'Continue scenario' : 'Resume studio'}</strong>
+                <span className="ops-mono">
+                  {draftStarted ? draftName || scenarioName : scenarioName}
+                </span>
               </TiltCard>
             ) : null}
             {examples.map((name) => (
@@ -152,7 +160,7 @@ export function ProjectLibrary() {
           <p className="ops-eyebrow">Saved on this device</p>
           {saved.length === 0 ? (
             <p className="ops-empty-note">
-              No local projects yet. Save from Studio or Constellation designer.
+              No local projects yet. Save from the project screen after you build one.
             </p>
           ) : (
             <div className="ops-project-grid">

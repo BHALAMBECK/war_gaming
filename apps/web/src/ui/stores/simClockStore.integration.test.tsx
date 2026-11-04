@@ -21,6 +21,7 @@ describe('simClockStore integration', () => {
   describe('store initialization', () => {
     it('initializes with default values', () => {
       const { result } = renderHook(() => useSimClockStore());
+      // beforeEach forces play for downstream tests; module default is paused: true.
       expect(result.current.paused).toBe(false);
       expect(result.current.timeScale).toBe(1.0);
       expect(result.current.simTime).toBe(0);

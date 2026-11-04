@@ -16,12 +16,14 @@ export type SolarControlsHandle = {
 };
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useOpsStore } from '@/ui/stores/opsStore';
+import { useAgentStore } from '@/ui/stores/agentStore';
 import { PLANETS, planetPositionAu, sampleOrbitAu } from '@/sim/solar/planets';
 import {
-  disposeBodyTextures,
   loadBodyTextures,
+  releaseBodyTextures,
   type BodyTextureSet,
 } from './textures/planetTextures';
+import type { CentralBody } from '@/sim/orbit/bodies';
 
 function OrbitRing({ planetId }: { planetId: string }) {
   const planet = PLANETS.find((p) => p.id === planetId)!;
@@ -73,7 +75,7 @@ function PlanetBody({
   const hasMap = Boolean(textures.map);
   const segments = focused || planetId === 'earth' || planetId === 'mars' ? 96 : 64;
   const bumpScale =
-    planetId === 'mars' ? 0.012 : planetId === 'earth' ? 0.008 : 0.006;
+    planetId === 'mars' ? 0.035 : planetId === 'earth' ? 0.012 : 0.01;
 
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
@@ -116,18 +118,13 @@ function EarthMoonCompanion({ earthRadius }: { earthRadius: number }) {
 
   useEffect(() => {
     let cancelled = false;
-    let loaded: BodyTextureSet = {};
     loadBodyTextures('moon').then((set) => {
-      if (cancelled) {
-        disposeBodyTextures(set);
-        return;
-      }
-      loaded = set;
+      if (cancelled) return;
       setTextures(set);
     });
     return () => {
       cancelled = true;
-      disposeBodyTextures(loaded);
+      releaseBodyTextures('moon');
     };
   }, []);
 
@@ -139,7 +136,7 @@ function EarthMoonCompanion({ earthRadius }: { earthRadius: number }) {
         0,
         Math.sin(angle.current) * dist
       );
-      meshRef.current.rotation.y += dt * 0.2;
+      meshRef.current.rotation.y += dt * 0.04;
     }
   });
 
@@ -209,6 +206,105 @@ export function SolarFocusController({
 }
 
 /**
+ * LOD sat markers near Earth / Moon / Mars in the schematic overview.
+ */
+function OverviewSatMarkers({ simTime }: { simTime: number }) {
+  const agents = useAgentStore((s) => s.agents);
+  const selectAgent = useAgentStore((s) => s.selectAgent);
+  const setViewMode = useOpsStore((s) => s.setViewMode);
+
+  const byBody = useMemo(() => {
+    const groups: Record<CentralBody, typeof agents> = {
+      earth: [],
+      moon: [],
+      mars: [],
+    };
+    for (const a of agents) {
+      const body = (a.centralBody ?? 'earth') as CentralBody;
+      if (body in groups) groups[body].push(a);
+    }
+    return groups;
+  }, [agents]);
+
+  const markers = useMemo(() => {
+    const out: {
+      id: string;
+      x: number;
+      y: number;
+      z: number;
+      body: CentralBody;
+      hero: boolean;
+      friendly: boolean;
+    }[] = [];
+
+    const earth = PLANETS.find((p) => p.id === 'earth')!;
+    const mars = PLANETS.find((p) => p.id === 'mars')!;
+    const [ex, ey, ez] = planetPositionAu(earth, simTime);
+    const [mx, my, mz] = planetPositionAu(mars, simTime);
+    const moonDist = earth.displayRadius * 3.2;
+    const moonAngle = simTime * 0.00002;
+    const moonPos: [number, number, number] = [
+      ex + Math.cos(moonAngle) * moonDist,
+      ey,
+      ez + Math.sin(moonAngle) * moonDist,
+    ];
+
+    const place = (
+      body: CentralBody,
+      center: [number, number, number],
+      displayR: number
+    ) => {
+      const list = byBody[body];
+      list.forEach((agent, i) => {
+        const n = Math.max(1, list.length);
+        const ang = (i / n) * Math.PI * 2;
+        const ring = displayR * (1.6 + (i % 3) * 0.25);
+        out.push({
+          id: agent.id,
+          x: center[0] + Math.cos(ang) * ring,
+          y: center[1] + Math.sin(ang * 0.7) * ring * 0.15,
+          z: center[2] + Math.sin(ang) * ring,
+          body,
+          hero: agent.visualRole === 'hero',
+          friendly: agent.team === 'friendly',
+        });
+      });
+    };
+
+    place('earth', [ex, ey, ez], earth.displayRadius);
+    place('moon', moonPos, earth.displayRadius * 0.27);
+    place('mars', [mx, my, mz], mars.displayRadius);
+    return out;
+  }, [byBody, simTime]);
+
+  if (markers.length === 0) return null;
+
+  return (
+    <group>
+      {markers.map((m) => (
+        <mesh
+          key={m.id}
+          position={[m.x, m.y, m.z]}
+          onClick={(e) => {
+            e.stopPropagation();
+            selectAgent(m.id);
+            setViewMode(m.body);
+          }}
+        >
+          <sphereGeometry args={[m.hero ? 0.012 : 0.006, 8, 8]} />
+          <meshBasicMaterial
+            color={
+              m.hero ? '#c4a574' : m.friendly ? '#3b82f6' : '#e10600'
+            }
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/**
  * Heliocentric solar-system map (Sun + planets). Free Three.js — no Cesium.
  */
 export function SolarSystem() {
@@ -221,7 +317,6 @@ export function SolarSystem() {
 
   useEffect(() => {
     let cancelled = false;
-    const loaded: Record<string, BodyTextureSet> = {};
     const ids = [
       'earth',
       'mars',
@@ -237,20 +332,16 @@ export function SolarSystem() {
     Promise.all(
       ids.map(async (id) => {
         const set = await loadBodyTextures(id);
-        loaded[id] = set;
         return [id, set] as const;
       })
     ).then((entries) => {
-      if (cancelled) {
-        for (const set of Object.values(loaded)) disposeBodyTextures(set);
-        return;
-      }
+      if (cancelled) return;
       setTextureMap(Object.fromEntries(entries));
     });
 
     return () => {
       cancelled = true;
-      for (const set of Object.values(loaded)) disposeBodyTextures(set);
+      for (const id of ids) releaseBodyTextures(id);
     };
   }, []);
 
@@ -273,6 +364,16 @@ export function SolarSystem() {
           emissiveIntensity={1.6}
         />
       </mesh>
+      {/* Soft solar glow */}
+      <mesh scale={2.4}>
+        <sphereGeometry args={[0.08, 32, 32]} />
+        <meshBasicMaterial
+          color="#ffaa44"
+          transparent
+          opacity={0.18}
+          depthWrite={false}
+        />
+      </mesh>
       <pointLight color="#ffd27a" intensity={2.8} distance={100} decay={1.05} />
       <ambientLight intensity={0.45} />
 
@@ -287,6 +388,7 @@ export function SolarSystem() {
           />
         </group>
       ))}
+      <OverviewSatMarkers simTime={simTime} />
     </group>
   );
 }

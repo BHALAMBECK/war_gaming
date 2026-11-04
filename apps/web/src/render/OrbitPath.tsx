@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { cartesianToElements, elementsToCartesian } from '@/sim/orbit/conversions';
 import { OrbitalElements } from '@/sim/orbit/types';
-import { eciToScene } from './utils/coordinateConversion';
+import { bodyToScene } from './utils/coordinateConversion';
+import { getBodyParams } from '@/sim/orbit/bodies';
 
 /**
  * OrbitPath component that visualizes the full orbit ellipse for the selected agent.
@@ -15,27 +16,21 @@ export function OrbitPath() {
     if (!selectedAgent) return null;
 
     try {
-      // Convert current state to orbital elements
-      const elements = cartesianToElements(selectedAgent.state);
+      const body = selectedAgent.centralBody ?? 'earth';
+      const { mu, radius } = getBodyParams(body);
+      const elements = cartesianToElements(selectedAgent.state, mu);
 
-      // Generate points along the orbit by varying true anomaly
       const numPoints = 100;
       const points: [number, number, number][] = [];
 
       for (let i = 0; i <= numPoints; i++) {
         const ν = (i / numPoints) * 2 * Math.PI;
-        
-        // Create orbital elements with this true anomaly
         const orbitElements: OrbitalElements = {
           ...elements,
           ν,
         };
-
-        // Convert to Cartesian state
-        const state = elementsToCartesian(orbitElements);
-        
-        // Convert to scene coordinates
-        const scenePos = eciToScene(state.position);
+        const state = elementsToCartesian(orbitElements, mu);
+        const scenePos = bodyToScene(state.position, radius);
         points.push(scenePos);
       }
 
@@ -46,11 +41,8 @@ export function OrbitPath() {
     }
   }, [selectedAgent]);
 
-  // Convert points to Float32Array for buffer geometry
-  // Always call this hook, even if orbitPoints is null
   const positions = useMemo(() => {
     if (!orbitPoints) {
-      // Return empty array if no points
       return new Float32Array(0);
     }
     const array = new Float32Array(orbitPoints.length * 3);
@@ -62,7 +54,6 @@ export function OrbitPath() {
     return array;
   }, [orbitPoints]);
 
-  // Only render if we have valid data
   if (!selectedAgent || !orbitPoints) return null;
 
   return (

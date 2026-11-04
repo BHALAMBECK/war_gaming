@@ -4,6 +4,10 @@
  */
 
 import { OrbitalElements, CartesianState } from '@/sim/orbit/types';
+import type { CentralBody } from '@/sim/orbit/bodies';
+
+export type { CentralBody };
+export type VisualRole = 'constellation' | 'hero';
 
 /**
  * Formation types for agent behaviors (placeholder for milestone 7).
@@ -60,6 +64,13 @@ export interface AgentScenario {
   dvRemaining?: number;
   /** Optional bus configuration from the satellite designer */
   bus?: AgentBusMetadata;
+  /**
+   * Central body for COEs / Kepler propagation.
+   * Defaults to 'earth' for backward compatibility.
+   */
+  centralBody?: CentralBody;
+  /** Mesh / LOD role. Defaults to 'constellation'. */
+  visualRole?: VisualRole;
 }
 
 /**

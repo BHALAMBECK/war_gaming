@@ -4,7 +4,8 @@
 
 import type { Agent } from '@/render/Agents.types';
 import type { FidelityLevel } from '@/sim/orbit/fidelity';
-import { propagateOrbitBatch } from '@/sim/orbit/propagator';
+import { propagateOrbit } from '@/sim/orbit/propagator';
+import type { CartesianState } from '@/sim/orbit/types';
 import {
   computeSwarmForces,
   enforceMinimumSeparation,
@@ -22,6 +23,21 @@ export interface StepAgentsResult {
   agents: Agent[];
   objectives: Objective[];
   newlyCompleted: string[];
+}
+
+/**
+ * Propagate each state with that agent's central-body μ / fidelity gate.
+ */
+function propagateStatesForAgents(
+  agents: Agent[],
+  states: CartesianState[],
+  dt: number,
+  fidelity: FidelityLevel
+): CartesianState[] {
+  return states.map((state, index) => {
+    const body = agents[index]?.centralBody ?? 'earth';
+    return propagateOrbit(state, dt, fidelity, body);
+  });
 }
 
 /**
@@ -48,7 +64,8 @@ export function stepAgents(
   const autoAgents = agents.filter((a) => !playerControlledIds.has(a.id));
 
   const playerStates = playerControlledAgents.map((a) => a.state);
-  const propagatedPlayerStates = propagateOrbitBatch(
+  const propagatedPlayerStates = propagateStatesForAgents(
+    playerControlledAgents,
     playerStates,
     dt,
     fidelity
@@ -96,7 +113,12 @@ export function stepAgents(
         ],
       };
     });
-    propagatedAutoStates = propagateOrbitBatch(adjustedStates, dt, fidelity);
+    propagatedAutoStates = propagateStatesForAgents(
+      autoAgents,
+      adjustedStates,
+      dt,
+      fidelity
+    );
   } else if (autoAgents.length > 0) {
     const autoStates = autoAgents.map((a) => a.state);
     const velocityAdjustments = computeSwarmForces(
@@ -122,7 +144,12 @@ export function stepAgents(
         ],
       };
     });
-    propagatedAutoStates = propagateOrbitBatch(adjustedStates, dt, fidelity);
+    propagatedAutoStates = propagateStatesForAgents(
+      autoAgents,
+      adjustedStates,
+      dt,
+      fidelity
+    );
   }
 
   const nextById = new Map<string, Agent>();

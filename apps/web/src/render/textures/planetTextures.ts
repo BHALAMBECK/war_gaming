@@ -1,9 +1,10 @@
 /**
- * Shared planet/moon texture URLs (CORS-friendly CDNs) + helpers.
+ * Shared planet/moon texture URLs (CORS-friendly CDNs) + cached helpers.
  */
 
 import {
   RepeatWrapping,
+  SRGBColorSpace,
   Texture,
   TextureLoader,
   type Texture as ThreeTexture,
@@ -13,6 +14,7 @@ const THREE_PLANETS =
   'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets';
 const THREE_PLANETS_RAW =
   'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets';
+const THREE_ORG = 'https://threejs.org/examples/textures/planets';
 const THREEX =
   'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images';
 const THREEX_RAW =
@@ -26,28 +28,32 @@ export interface BodyTextureSet {
   normal?: ThreeTexture;
 }
 
+/** Primary + fallbacks per kind (tried in order). */
 export const BODY_TEXTURE_URLS: Record<
   string,
-  Partial<Record<BodyTextureKind, [string, string]>>
+  Partial<Record<BodyTextureKind, string[]>>
 > = {
   earth: {
     map: [
       `${THREE_PLANETS}/earth_atmos_2048.jpg`,
+      `${THREE_ORG}/earth_atmos_2048.jpg`,
       `${THREE_PLANETS_RAW}/earth_atmos_2048.jpg`,
     ],
     normal: [
       `${THREE_PLANETS}/earth_normal_2048.jpg`,
+      `${THREE_ORG}/earth_normal_2048.jpg`,
       `${THREE_PLANETS_RAW}/earth_normal_2048.jpg`,
     ],
   },
   moon: {
     map: [
       `${THREE_PLANETS}/moon_1024.jpg`,
+      `${THREE_ORG}/moon_1024.jpg`,
       `${THREE_PLANETS_RAW}/moon_1024.jpg`,
     ],
-    // Reuse albedo as bump for crater relief when no dedicated bump is available
     bump: [
       `${THREE_PLANETS}/moon_1024.jpg`,
+      `${THREE_ORG}/moon_1024.jpg`,
       `${THREE_PLANETS_RAW}/moon_1024.jpg`,
     ],
   },
@@ -77,73 +83,105 @@ export const BODY_TEXTURE_URLS: Record<
   },
 };
 
+const loader = new TextureLoader();
+loader.crossOrigin = 'anonymous';
+
+/** In-flight / resolved cache so Strict Mode remounts share one load. */
+const cache = new Map<string, Promise<BodyTextureSet>>();
+const retainCount = new Map<string, number>();
+
 function configureTexture(texture: Texture, asColor: boolean): Texture {
   texture.wrapS = texture.wrapT = RepeatWrapping;
-  texture.anisotropy = 8;
+  texture.anisotropy = 16;
+  texture.needsUpdate = true;
   if (asColor) {
-    texture.colorSpace = 'srgb';
+    texture.colorSpace = SRGBColorSpace;
   }
   return texture;
 }
 
-function loadOne(
-  loader: TextureLoader,
-  primary: string,
-  fallback: string,
-  asColor: boolean
-): Promise<Texture | null> {
+function loadOne(urls: string[], asColor: boolean): Promise<Texture | null> {
   return new Promise((resolve) => {
-    const tryUrl = (url: string, isFallback: boolean) => {
+    let i = 0;
+    const tryNext = () => {
+      if (i >= urls.length) {
+        resolve(null);
+        return;
+      }
+      const url = urls[i++]!;
       loader.load(
         url,
         (tex) => resolve(configureTexture(tex, asColor)),
         undefined,
-        () => {
-          if (!isFallback) tryUrl(fallback, true);
-          else resolve(null);
-        }
+        () => tryNext()
       );
     };
-    tryUrl(primary, false);
+    tryNext();
   });
 }
 
-/**
- * Load map/bump/normal for a body id. Missing kinds are omitted.
- */
-export async function loadBodyTextures(
-  bodyId: string
-): Promise<BodyTextureSet> {
+async function fetchBodyTextures(bodyId: string): Promise<BodyTextureSet> {
   const spec = BODY_TEXTURE_URLS[bodyId];
   if (!spec) return {};
 
-  const loader = new TextureLoader();
-  loader.crossOrigin = 'anonymous';
   const out: BodyTextureSet = {};
 
-  if (spec.map) {
-    const map = await loadOne(loader, spec.map[0]!, spec.map[1]!, true);
+  if (spec.map?.length) {
+    const map = await loadOne(spec.map, true);
     if (map) out.map = map;
   }
-  if (spec.bump) {
-    const bump = await loadOne(loader, spec.bump[0]!, spec.bump[1]!, false);
+  if (spec.bump?.length) {
+    const bump = await loadOne(spec.bump, false);
     if (bump) out.bump = bump;
   }
-  if (spec.normal) {
-    const normal = await loadOne(
-      loader,
-      spec.normal[0]!,
-      spec.normal[1]!,
-      false
-    );
+  if (spec.normal?.length) {
+    const normal = await loadOne(spec.normal, false);
     if (normal) out.normal = normal;
+  }
+
+  // If bump failed but map exists, reuse albedo for relief
+  if (!out.bump && out.map) {
+    out.bump = out.map;
   }
 
   return out;
 }
 
+/**
+ * Load map/bump/normal for a body id (cached). Call releaseBodyTextures on unmount.
+ */
+export function loadBodyTextures(bodyId: string): Promise<BodyTextureSet> {
+  retainCount.set(bodyId, (retainCount.get(bodyId) ?? 0) + 1);
+
+  let pending = cache.get(bodyId);
+  if (!pending) {
+    pending = fetchBodyTextures(bodyId).catch((err) => {
+      cache.delete(bodyId);
+      throw err;
+    });
+    cache.set(bodyId, pending);
+  }
+  return pending;
+}
+
+/**
+ * Drop a retain on cached body textures.
+ * Textures stay cached for the session so React Strict Mode remounts
+ * (and Overview ↔ body-local switches) cannot dispose maps mid-frame.
+ */
+export function releaseBodyTextures(bodyId: string): void {
+  const n = (retainCount.get(bodyId) ?? 1) - 1;
+  if (n <= 0) retainCount.delete(bodyId);
+  else retainCount.set(bodyId, n);
+}
+
+/** @deprecated Prefer releaseBodyTextures(bodyId) for shared cache. */
 export function disposeBodyTextures(set: BodyTextureSet) {
-  set.map?.dispose();
-  set.bump?.dispose();
-  set.normal?.dispose();
+  const seen = new Set<ThreeTexture>();
+  for (const tex of [set.map, set.bump, set.normal]) {
+    if (tex && !seen.has(tex)) {
+      seen.add(tex);
+      tex.dispose();
+    }
+  }
 }

@@ -5,22 +5,30 @@
 import { Scenario } from './types';
 import { validateScenario } from './schema';
 import { expandLargeSwarmScenario } from './examples/generateLargeSwarm';
+import { expandSolarMissionsScenario } from './examples/generateSolarMissions';
 
 import demoScenarioData from './examples/demo.json';
 import taskDemoScenarioData from './examples/task-demo.json';
 import largeSwarmScenarioData from './examples/large-swarm.json';
 import simpleRingScenarioData from './examples/simple-ring.json';
+import solarMissionsScenarioData from './examples/solar-missions.json';
 
 /**
  * Available example scenario names.
  */
-export type ExampleScenarioName = 'demo' | 'task-demo' | 'large-swarm' | 'simple-ring';
+export type ExampleScenarioName =
+  | 'demo'
+  | 'task-demo'
+  | 'large-swarm'
+  | 'simple-ring'
+  | 'solar-missions';
 
 export const EXAMPLE_SCENARIO_LABELS: Record<ExampleScenarioName, string> = {
   demo: 'Demo',
   'simple-ring': 'Simple Ring',
   'large-swarm': 'Large Swarm (500)',
   'task-demo': 'Task Demo',
+  'solar-missions': 'Solar Missions',
 };
 
 /**
@@ -31,6 +39,7 @@ const EXAMPLE_SCENARIOS: Record<ExampleScenarioName, unknown> = {
   'task-demo': taskDemoScenarioData,
   'large-swarm': largeSwarmScenarioData,
   'simple-ring': simpleRingScenarioData,
+  'solar-missions': solarMissionsScenarioData,
 };
 
 /**
@@ -51,6 +60,9 @@ export function loadExampleScenario(name: ExampleScenarioName): Scenario {
     const validated = validateScenario(scenarioData);
     if (name === 'large-swarm') {
       return expandLargeSwarmScenario(validated);
+    }
+    if (name === 'solar-missions') {
+      return expandSolarMissionsScenario(validated);
     }
     return validated;
   } catch (error) {

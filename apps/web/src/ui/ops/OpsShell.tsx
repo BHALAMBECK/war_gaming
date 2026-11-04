@@ -6,22 +6,21 @@ import {
   FIDELITY_LABELS,
   FidelityLevel,
   PANEL_LIMITS,
+  isOverviewMode,
+  type ViewMode,
 } from '@/ui/stores/opsStore';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
+import { useAgentStore } from '@/ui/stores/agentStore';
+import { useCameraStore } from '@/ui/stores/cameraStore';
 import { TimeControlPanel } from '@/ui/TimeControlPanel';
 import { ManeuverPanel } from '@/ui/ManeuverPanel';
 import { TaskPanel } from '@/ui/TaskPanel';
 import { CameraPanel } from '@/ui/CameraPanel';
-import { ScenarioSection } from '@/ui/ScenarioSection';
-import { ScenarioDesigner } from './ScenarioDesigner';
-import { ConstellationDesigner } from './ConstellationDesigner';
-import { SatelliteDesigner } from './SatelliteDesigner';
 import { startDemo } from '@/ui/demo/demoMode';
-import { useCallback, useRef, useState } from 'react';
+import { showProject } from './studioNavigation';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { usePanelResize } from './usePanelResize';
 import { PhaseNav } from './PhaseNav';
-
-type ToolsTab = 'load' | 'scenario' | 'satellite' | 'constellation' | 'legacy';
 
 interface OpsShellProps {
   hidden: boolean;
@@ -46,6 +45,42 @@ export function OpsShell({
   const setViewMode = useOpsStore((s) => s.setViewMode);
   const fidelity = useOpsStore((s) => s.fidelity);
   const setFidelity = useOpsStore((s) => s.setFidelity);
+  const agents = useAgentStore((s) => s.agents);
+  const cameraPreset = useCameraStore((s) => s.preset);
+  const setCameraPreset = useCameraStore((s) => s.setPreset);
+  const hasMultiBody = useMemo(
+    () => agents.some((a) => (a.centralBody ?? 'earth') !== 'earth'),
+    [agents]
+  );
+  const activeModeLabel = useMemo(() => {
+    if (cameraPreset === 'zoomIn') return 'Zoom in';
+    if (isOverviewMode(viewMode)) return 'Overview';
+    if (viewMode === 'moon') return 'Moon';
+    if (viewMode === 'mars') return 'Mars';
+    return 'Earth';
+  }, [viewMode, cameraPreset]);
+
+  const goBody = (mode: ViewMode) => {
+    setCameraPreset('freecam');
+    setViewMode(mode);
+  };
+
+  const goZoomIn = () => {
+    const selected = useAgentStore.getState().getSelectedAgent();
+    const hero = agents.find(
+      (a) => a.visualRole === 'hero' || a.id.startsWith('HERO-')
+    );
+    const target = selected ?? hero;
+    if (target) {
+      const body = target.centralBody ?? 'earth';
+      if (body === 'moon' || body === 'mars' || body === 'earth') {
+        setViewMode(body);
+      }
+    } else if (isOverviewMode(viewMode)) {
+      setViewMode('earth');
+    }
+    setCameraPreset('zoomIn');
+  };
   const leftPanelOpen = useOpsStore((s) => s.leftPanelOpen);
   const rightPanelOpen = useOpsStore((s) => s.rightPanelOpen);
   const setLeftPanelOpen = useOpsStore((s) => s.setLeftPanelOpen);
@@ -59,8 +94,7 @@ export function OpsShell({
   const formatTime = useSimClockStore((s) => s.formatTime);
   const paused = useSimClockStore((s) => s.paused);
   const toggle = useSimClockStore((s) => s.toggle);
-  const [toolsOpen, setToolsOpen] = useState(false);
-  const [toolsTab, setToolsTab] = useState<ToolsTab>('scenario');
+  const [controlsOpen, setControlsOpen] = useState(false);
   const demoCleanupRef = useRef<(() => void) | null>(null);
 
   const getLeft = useCallback(
@@ -153,57 +187,12 @@ export function OpsShell({
         </aside>
 
         <div className="ops-center">
-          {toolsOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                width: 340,
-                maxHeight: 'calc(100% - 16px)',
-                overflow: 'auto',
-                zIndex: 6,
-                pointerEvents: 'auto',
-                background: 'var(--ops-panel)',
-                border: '1px solid var(--ops-border)',
-                padding: 8,
-              }}
-            >
+          {controlsOpen && (
+            <div className="ops-controls-drawer">
               <div className="ops-section-title" style={{ marginTop: 0 }}>
-                Design tools
+                Run controls
               </div>
-              <div
-                className="ops-btn-group"
-                style={{ marginBottom: 10, flexWrap: 'wrap' }}
-              >
-                {(
-                  [
-                    ['scenario', 'Scenario'],
-                    ['satellite', 'Satellite'],
-                    ['constellation', 'Constellation'],
-                    ['load', 'Load/Save'],
-                    ['legacy', 'Legacy'],
-                  ] as const
-                ).map(([id, label]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`ops-btn ${toolsTab === id ? 'active' : ''}`}
-                    onClick={() => setToolsTab(id)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {toolsTab === 'scenario' && <ScenarioDesigner />}
-              {toolsTab === 'satellite' && <SatelliteDesigner />}
-              {toolsTab === 'constellation' && <ConstellationDesigner />}
-              {toolsTab === 'load' && <ScenarioSection isExpanded />}
-              {toolsTab === 'legacy' && (
-                <div style={{ position: 'relative' }}>
-                  <LegacyPanelHost />
-                </div>
-              )}
+              <LegacyPanelHost />
             </div>
           )}
         </div>
@@ -245,20 +234,65 @@ export function OpsShell({
         <PhaseNav current="ops" compact />
 
         <div className="ops-btn-group">
-          <button
-            type="button"
-            className={`ops-btn ${viewMode === 'earth' ? 'active' : ''}`}
-            onClick={() => setViewMode('earth')}
-          >
-            Earth
-          </button>
-          <button
-            type="button"
-            className={`ops-btn ${viewMode === 'solar' ? 'active' : ''}`}
-            onClick={() => setViewMode('solar')}
-          >
-            Solar map
-          </button>
+          {hasMultiBody ? (
+            <>
+              <button
+                type="button"
+                className={`ops-btn ${isOverviewMode(viewMode) && cameraPreset !== 'zoomIn' ? 'active' : ''}`}
+                onClick={() => goBody('overview')}
+              >
+                Overview
+              </button>
+              <button
+                type="button"
+                className={`ops-btn ${viewMode === 'earth' && cameraPreset !== 'zoomIn' ? 'active' : ''}`}
+                onClick={() => goBody('earth')}
+              >
+                Earth
+              </button>
+              <button
+                type="button"
+                className={`ops-btn ${viewMode === 'moon' && cameraPreset !== 'zoomIn' ? 'active' : ''}`}
+                onClick={() => goBody('moon')}
+              >
+                Moon
+              </button>
+              <button
+                type="button"
+                className={`ops-btn ${viewMode === 'mars' && cameraPreset !== 'zoomIn' ? 'active' : ''}`}
+                onClick={() => goBody('mars')}
+              >
+                Mars
+              </button>
+              <button
+                type="button"
+                className={`ops-btn ${cameraPreset === 'zoomIn' ? 'active' : ''}`}
+                onClick={goZoomIn}
+              >
+                Zoom in
+              </button>
+              <span className="ops-label" style={{ marginLeft: 8 }}>
+                Mode: {activeModeLabel}
+              </span>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={`ops-btn ${viewMode === 'earth' ? 'active' : ''}`}
+                onClick={() => goBody('earth')}
+              >
+                Earth
+              </button>
+              <button
+                type="button"
+                className={`ops-btn ${isOverviewMode(viewMode) ? 'active' : ''}`}
+                onClick={() => goBody('overview')}
+              >
+                Solar map
+              </button>
+            </>
+          )}
         </div>
 
         <button type="button" className="ops-btn" onClick={toggle}>
@@ -308,10 +342,13 @@ export function OpsShell({
           </button>
           <button
             type="button"
-            className={`ops-btn ${toolsOpen ? 'active' : ''}`}
-            onClick={() => setToolsOpen(!toolsOpen)}
+            className={`ops-btn ${controlsOpen ? 'active' : ''}`}
+            onClick={() => setControlsOpen(!controlsOpen)}
           >
-            Tools
+            Controls
+          </button>
+          <button type="button" className="ops-btn" onClick={showProject}>
+            Design
           </button>
           <button
             type="button"
@@ -360,9 +397,6 @@ function LegacyPanelHost() {
       <TimeControlPanel />
       <ManeuverPanel />
       <TaskPanel />
-      <div style={{ padding: 6 }}>
-        <ScenarioSection isExpanded />
-      </div>
     </div>
   );
 }

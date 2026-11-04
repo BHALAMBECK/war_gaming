@@ -6,6 +6,7 @@ import { Scenario, AgentScenario } from './types';
 import { Agent } from '@/render/Agents.types';
 import { OrbitalElements } from '@/sim/orbit/types';
 import { cartesianToElements } from '@/sim/orbit/conversions';
+import { getBodyParams } from '@/sim/orbit/bodies';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
@@ -20,8 +21,10 @@ import { EARTH_RADIUS, EARTH_MU } from '@/sim/orbit/constants';
  * @returns AgentScenario with orbital elements
  */
 function agentToScenario(agent: Agent): AgentScenario {
-  // Convert Cartesian state to orbital elements
-  const elements = cartesianToElements(agent.state);
+  const body = agent.centralBody ?? 'earth';
+  const mu = getBodyParams(body).mu;
+  // Convert Cartesian state to orbital elements with body μ
+  const elements = cartesianToElements(agent.state, mu);
   
   return {
     id: agent.id,
@@ -29,6 +32,8 @@ function agentToScenario(agent: Agent): AgentScenario {
     behaviors: agent.behaviors, // Preserve agent behaviors
     team: agent.team, // Preserve team property
     dvRemaining: agent.dvRemaining,
+    centralBody: body,
+    visualRole: agent.visualRole ?? 'constellation',
   };
 }
 

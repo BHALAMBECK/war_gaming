@@ -67,6 +67,9 @@ const AgentBusMetadataSchema = z.object({
   summary: z.string(),
 });
 
+const CentralBodySchema = z.enum(['earth', 'moon', 'mars']);
+const VisualRoleSchema = z.enum(['constellation', 'hero']);
+
 const AgentScenarioSchema: z.ZodType<AgentScenario> = z.object({
   id: z.string().min(1),
   orbit: OrbitStateSchema,
@@ -74,6 +77,8 @@ const AgentScenarioSchema: z.ZodType<AgentScenario> = z.object({
   team: TeamSchema.optional().default('friendly'),
   dvRemaining: z.number().nonnegative().optional(),
   bus: AgentBusMetadataSchema.optional(),
+  centralBody: CentralBodySchema.optional().default('earth'),
+  visualRole: VisualRoleSchema.optional().default('constellation'),
 });
 
 /**

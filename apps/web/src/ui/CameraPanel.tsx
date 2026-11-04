@@ -8,6 +8,7 @@ export function CameraPanel() {
     { value: 'freecam', label: 'Freecam' },
     { value: 'cinematic', label: 'Cinematic Orbit' },
     { value: 'follow', label: 'Follow Target' },
+    { value: 'zoomIn', label: 'Zoom in' },
   ];
 
   return (

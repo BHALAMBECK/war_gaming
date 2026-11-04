@@ -6,6 +6,7 @@ import { Scenario } from './types';
 import { Agent } from '@/render/Agents.types';
 import { OrbitalElements, CartesianState } from '@/sim/orbit/types';
 import { elementsToCartesian } from '@/sim/orbit/conversions';
+import { getBodyParams } from '@/sim/orbit/bodies';
 import { useSimClockStore } from '@/ui/stores/simClockStore';
 import { useAgentStore } from '@/ui/stores/agentStore';
 import { useTaskStore } from '@/ui/stores/taskStore';
@@ -22,6 +23,9 @@ export function scenarioToAgents(scenario: Scenario): Agent[] {
   const agents: Agent[] = [];
 
   for (const agentScenario of scenario.agents) {
+    const centralBody = agentScenario.centralBody ?? 'earth';
+    const visualRole = agentScenario.visualRole ?? 'constellation';
+    const mu = getBodyParams(centralBody).mu;
     let state: CartesianState;
 
     // Check if orbit is OrbitalElements or CartesianState
@@ -29,9 +33,9 @@ export function scenarioToAgents(scenario: Scenario): Agent[] {
       // Already Cartesian state
       state = agentScenario.orbit as CartesianState;
     } else {
-      // Convert orbital elements to Cartesian state
+      // Convert orbital elements to Cartesian state with body μ
       const elements = agentScenario.orbit as OrbitalElements;
-      state = elementsToCartesian(elements);
+      state = elementsToCartesian(elements, mu);
     }
 
     const team = agentScenario.team ?? 'friendly';
@@ -44,6 +48,8 @@ export function scenarioToAgents(scenario: Scenario): Agent[] {
       // Default to 1000 m/s if dvRemaining is not specified (backward compatibility)
       dvRemaining: agentScenario.dvRemaining ?? 1000,
       systems: createDefaultSystems(team),
+      centralBody,
+      visualRole,
       selected: false,
       hovered: false,
     });
